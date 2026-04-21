@@ -3,427 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Archangel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;800&family=Noto+Sans+JP:wght@300;700&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
+    <title>Elite Archangel | System Mainframe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;900&family=Permanent+Marker&family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-color: #030508;
-            --accent: #e0e6ed;
-            --blue-glow: #1a4a76;
-            --text-main: #d1d5db;
+            --neon-blue: #00d2ff;
+            --deep-blue: #0a192f;
+            --white: #ffffff;
+            --shadow: 0 0 20px rgba(0, 210, 255, 0.7);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Montserrat', sans-serif;
+            background: #000;
+            color: var(--white);
+            font-family: 'Noto Sans JP', sans-serif;
             overflow: hidden;
             height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        /* --- АНИМИРОВАННЫЙ ФОН --- */
-        .bg-animation {
+        /* --- ФОНОВЫЕ ЭФФЕКТЫ --- */
+        #bg-canvas {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 0;
-            background: radial-gradient(circle at 15% 50%, rgba(26, 74, 118, 0.15), transparent 25%),
-                        radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.05), transparent 25%);
-            animation: bgShift 15s infinite alternate ease-in-out;
+            top: 0; left: 0;
+            z-index: 1;
+            filter: blur(1px);
         }
 
-        @keyframes bgShift {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 20%, #000 100%);
+            z-index: 2;
+            pointer-events: none;
         }
 
-        /* --- INTRO SCREEN --- */
-        #intro-screen {
+        /* --- ИНТРО --- */
+        #intro-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 1000;
+            transition: opacity 1s ease;
         }
 
-        .btn-glow {
-            padding: 15px 40px;
-            font-size: 1rem;
+        .start-trigger {
+            padding: 20px 60px;
             font-family: 'Orbitron', sans-serif;
-            letter-spacing: 3px;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 30px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all 0.4s ease;
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            background: transparent;
+            border: 2px solid var(--neon-blue);
             text-transform: uppercase;
+            letter-spacing: 10px;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+            z-index: 1001;
             position: relative;
-            overflow: hidden;
         }
 
-        .btn-glow::before {
-            content: '';
+        .start-trigger:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 50px var(--neon-blue);
+            transform: scale(1.1);
+        }
+
+        /* --- ЭФФЕКТЫ ТЕКСТА --- */
+        .cinematic-wrap {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 900;
+            display: none;
+        }
+
+        .jap-title {
+            font-size: 8rem;
+            opacity: 0;
+            color: rgba(255,255,255,0.1);
             position: absolute;
             top: 50%; left: 50%;
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
-            transform: translate(-50%, -50%) scale(0);
-            transition: transform 0.6s ease;
-        }
-
-        .btn-glow:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-glow:hover::before {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .cinematic-text {
-            position: absolute;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 2.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            text-align: center;
-        }
-
-        .cinematic-text.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        #jap-text {
-            font-family: 'Noto Sans JP', sans-serif;
-            font-size: 4rem;
-            color: rgba(255, 255, 255, 0.9);
-            letter-spacing: 20px;
-            font-weight: 300;
-            text-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-
-        #nick-text {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 5rem;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
             font-weight: 900;
-            background: linear-gradient(45deg, #fff, #5a8bb8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-top: 180px;
-            letter-spacing: 5px;
-            text-transform: uppercase;
         }
 
-        /* --- FLASHBANG --- */
-        #flashbang {
+        .main-nick {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 6rem;
+            opacity: 0;
+            position: relative;
+            text-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        /* --- CS2 FLASH EFFECT --- */
+        #flash {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #fff;
-            z-index: 999;
             opacity: 0;
+            z-index: 2000;
             pointer-events: none;
-            transition: opacity 0.8s ease-out;
         }
 
-        /* --- MAIN SITE & GLASSMORPHISM --- */
-        #main-site {
+        /* --- ГЛАВНЫЙ КОНТЕНТ --- */
+        #main-content {
             position: relative;
-            z-index: 10;
+            z-index: 100;
             display: none;
-            opacity: 0;
-            transition: opacity 2s ease-in;
-            perspective: 1000px; /* Для 3D эффекта */
-        }
-
-        .glass-card {
-            width: 700px;
-            padding: 50px;
-            background: rgba(15, 20, 30, 0.4);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            display: flex;
             flex-direction: column;
             align-items: center;
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
+            justify-content: center;
+            height: 100vh;
+            opacity: 0;
         }
 
-        .avatar-container {
+        .profile-card {
+            background: rgba(10, 25, 47, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            padding: 40px;
+            border-radius: 5px;
+            max-width: 800px;
             position: relative;
-            transform: translateZ(50px); /* Выдвигаем вперед в 3D */
-            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            animation: cardFloat 4s infinite ease-in-out;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
 
         .avatar {
-            width: 160px;
-            height: 160px;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: all 0.5s ease;
-        }
-
-        .avatar-container::after {
-            content: '';
-            position: absolute;
-            top: -5px; left: -5px; right: -5px; bottom: -5px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-            z-index: -1;
-            animation: spin 4s linear infinite;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: #fff;
-            letter-spacing: 2px;
-            transform: translateZ(40px);
+            border: 4px solid var(--neon-blue);
             margin-bottom: 20px;
-            text-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow);
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        h1.name {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(to bottom, #fff, var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .tags {
             display: flex;
-            gap: 12px;
-            margin-bottom: 35px;
-            transform: translateZ(30px);
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
         }
 
         .tag {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #aaa;
-            transition: all 0.3s ease;
+            padding: 5px 15px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            border: 1px solid var(--neon-blue);
+            border-radius: 2px;
+            background: rgba(0, 210, 255, 0.1);
         }
 
-        .tag:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.3);
+        .bio {
+            line-height: 1.6;
+            font-weight: 300;
+            color: #ccc;
+            border-left: 2px solid var(--neon-blue);
+            padding-left: 20px;
         }
 
-        .tag.gray { color: #b0b0b0; }
-        .tag.yellow { color: #e6c86e; }
+        .bio b { color: var(--neon-blue); }
 
-        .bio-box {
-            width: 100%;
-            text-align: left;
-            transform: translateZ(20px);
-        }
-
-        .bio-box p {
-            font-size: 1.05rem;
-            line-height: 1.7;
-            color: #9ba3af;
-            margin-bottom: 15px;
-        }
-
-        .bio-box span.hl {
-            color: #fff;
-            font-weight: 500;
-        }
-
-        .skills {
-            list-style: none;
-            margin-top: 15px;
-        }
-
-        .skills li {
-            position: relative;
-            padding-left: 25px;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-            color: #d1d5db;
-        }
-
-        .skills li::before {
-            content: '♦';
-            position: absolute;
-            left: 0;
-            color: #5a8bb8;
-            font-size: 0.8rem;
-            top: 2px;
-        }
-
-        /* Пылинки на фоне */
-        .particles {
-            position: absolute;
-            width: 100%; height: 100%;
+        /* Эффект шума */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url(https://grainy-gradients.vercel.app/noise.svg);
+            opacity: 0.05;
+            z-index: 500;
             pointer-events: none;
-            z-index: 1;
         }
     </style>
 </head>
 <body>
 
-    <audio id="bgm" loop>
+    <audio id="music" loop>
         <source src="track.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="bg-animation"></div>
-    <div class="particles" id="particles"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="overlay"></div>
+    <div id="flash"></div>
 
-    <div id="intro-screen">
-        <button class="btn-glow" id="start-btn">Initiate</button>
-        
-        <h1 id="jap-text" class="cinematic-text">機密アクセス</h1>
-        <h2 id="nick-text" class="cinematic-text">Elite Archangel</h2>
+    <div id="intro-overlay">
+        <button class="start-trigger" id="activeBtn">Access System</button>
     </div>
 
-    <div id="flashbang"></div>
+    <div class="cinematic-wrap" id="cine">
+        <div class="jap-title" id="j1">最高の天使</div>
+        <div class="main-nick" id="n1">Elite Archangel</div>
+    </div>
 
-    <div id="main-site">
-        <div class="glass-card" id="card">
-            <div class="avatar-container">
-                <img src="avatar.png" alt="EliteArchangel" class="avatar">
-            </div>
+    <div id="main-content">
+        <div class="profile-card">
+            <img src="avatar.png" class="avatar" alt="Elite Archangel">
+            <h1 class="name">Elite Archangel</h1>
             
-            <h1 class="title">EliteArchangel</h1>
-
             <div class="tags">
-                <span class="tag gray">Gray Hat</span>
-                <span class="tag yellow">Yellow Hat</span>
-                <span class="tag">OSINT</span>
-                <span class="tag">Full-Stack</span>
+                <span class="tag">GRAY HAT</span>
+                <span class="tag">YELLOW HAT</span>
+                <span class="tag">OSINT FULLSTACK</span>
+                <span class="tag">JAPAN STYLE</span>
             </div>
 
-            <div class="bio-box">
-                <p>Специалист в области информационной безопасности и <span class="hl">Full-Stack</span> разработки. Оперирую в спектре <span class="hl">Gray</span> и <span class="hl">Yellow Hat</span>, балансируя между исследованием уязвимостей и созданием архитектуры.</p>
-                
-                <ul class="skills">
-                    <li>Глубокий поиск уязвимостей и аудит систем</li>
-                    <li>Комплексная разработка сайтов и GameDev</li>
-                    <li>Проектирование ПО для удаленного доступа</li>
-                    <li>Продвинутая OSINT-разведка и сбор данных</li>
-                </ul>
+            <div class="bio">
+                <p>Инициализация... <b>[SUCCESS]</b></p>
+                <br>
+                <p>Я — независимый разработчик и исследователь безопасности. <br>
+                Специализируюсь на <b>Full-stack разработке</b> сложных веб-систем и архитектуре игр.</p>
+                <br>
+                <p>Мои инструменты: 
+                <b>Поиск критических уязвимостей</b>, создание ПО для <b>удаленного контроля</b> и глубокий <b>OSINT</b> анализ (сбор данных по открытым источникам).</p>
+                <br>
+                <p style="color: var(--neon-blue); font-size: 0.8rem;">// ESTD 2024. ALL SYSTEMS OPERATIONAL.</p>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script>
-        const startBtn = document.getElementById('start-btn');
-        const introScreen = document.getElementById('intro-screen');
-        const japText = document.getElementById('jap-text');
-        const nickText = document.getElementById('nick-text');
-        const flashbang = document.getElementById('flashbang');
-        const mainSite = document.getElementById('main-site');
-        const audio = document.getElementById('bgm');
+        const btn = document.getElementById('activeBtn');
+        const audio = document.getElementById('music');
 
-        // Тайминги анимации
-        startBtn.addEventListener('click', () => {
-            // Прячем кнопку
-            startBtn.style.display = 'none';
+        // ГАРАНТИРОВАННЫЙ ЗАПУСК
+        btn.addEventListener('click', () => {
+            console.log("System Initialized");
+            
+            // 1. Убираем оверлей и запускаем музыку
+            document.getElementById('intro-overlay').style.opacity = '0';
+            setTimeout(() => { document.getElementById('intro-overlay').style.display = 'none'; }, 1000);
+            
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio block bypass needed"));
 
-            // Безопасный запуск аудио
-            try {
-                audio.volume = 0.6;
-                let playPromise = audio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => console.log("Аудио не найдено или заблокировано, продолжаем визуал."));
-                }
-            } catch(e) {}
+            // 2. Анимация текста
+            document.getElementById('cine').style.display = 'block';
+            
+            anime.timeline()
+            .add({
+                targets: '#j1',
+                opacity: [0, 0.2],
+                scale: [0.5, 1.2],
+                duration: 2000,
+                easing: 'easeOutExpo'
+            })
+            .add({
+                targets: '#n1',
+                opacity: [0, 1],
+                letterSpacing: ['20px', '2px'],
+                duration: 1500,
+                easing: 'easeOutElastic(1, .5)',
+                offset: '-=1000'
+            });
 
-            // 1. Появление иероглифов
-            setTimeout(() => { japText.classList.add('show'); }, 300);
-
-            // 2. Появление ника
-            setTimeout(() => { nickText.classList.add('show'); }, 2500);
-
-            // 3. Флешка (Взрыв света)
+            // 3. ЭФФЕКТ ФЛЕШКИ И ПЕРЕХОД
             setTimeout(() => {
-                flashbang.style.opacity = '1';
-            }, 5000);
+                const flash = document.getElementById('flash');
+                flash.style.opacity = '1';
+                
+                // Тряска экрана как от взрыва
+                anime({
+                    targets: 'body',
+                    translateX: [10, -10, 0],
+                    duration: 100,
+                    loop: 5
+                });
 
-            // 4. Смена экранов (пока экран белый)
-            setTimeout(() => {
-                introScreen.style.display = 'none';
-                mainSite.style.display = 'flex';
-                // Плавное появление мейн сайта
-                setTimeout(() => { mainSite.style.opacity = '1'; }, 100);
-            }, 5500);
-
-            // 5. Затухание флешки
-            setTimeout(() => {
-                flashbang.style.opacity = '0';
-            }, 5600);
+                setTimeout(() => {
+                    document.getElementById('cine').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'flex';
+                    anime({
+                        targets: '#main-content',
+                        opacity: 1,
+                        duration: 2000,
+                        easing: 'linear'
+                    });
+                    
+                    // Плавное затухание флешки
+                    anime({
+                        targets: '#flash',
+                        opacity: 0,
+                        duration: 3000,
+                        easing: 'easeOutQuad'
+                    });
+                }, 200);
+            }, 4500);
         });
 
-        // 3D Эффект карточки при движении мыши (Vanilla JS)
-        const card = document.getElementById('card');
-        
-        document.addEventListener('mousemove', (e) => {
-            if (mainSite.style.display === 'flex') {
-                let xAxis = (window.innerWidth / 2 - e.pageX) / 40;
-                let yAxis = (window.innerHeight / 2 - e.pageY) / 40;
-                card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        // ФОНОВАЯ АНИМАЦИЯ (Сакура и частицы)
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.reset();
             }
-        });
-
-        // Плавный возврат карточки, когда мышь уходит
-        document.addEventListener('mouseleave', () => {
-            card.style.transform = `rotateY(0deg) rotateX(0deg)`;
-            card.style.transition = 'transform 0.5s ease';
-        });
-        document.addEventListener('mouseenter', () => {
-            card.style.transition = 'transform 0.1s ease-out';
-        });
-
-        // Простая генерация пылинок на фоне
-        const particlesContainer = document.getElementById('particles');
-        for(let i=0; i<30; i++) {
-            let div = document.createElement('div');
-            div.style.position = 'absolute';
-            div.style.width = Math.random() * 3 + 'px';
-            div.style.height = div.style.width;
-            div.style.background = 'rgba(255,255,255,0.3)';
-            div.style.borderRadius = '50%';
-            div.style.top = Math.random() * 100 + 'vh';
-            div.style.left = Math.random() * 100 + 'vw';
-            div.style.animation = `floatParticle ${Math.random() * 10 + 10}s linear infinite`;
-            particlesContainer.appendChild(div);
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.color = Math.random() > 0.5 ? '#00d2ff' : '#fff';
+                this.opacity = Math.random();
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y > canvas.height) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.fill();
+            }
         }
 
-        // Добавляем стили для пылинок динамически
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes floatParticle {
-                0% { transform: translateY(0) translateX(0); opacity: 0; }
-                20% { opacity: 1; }
-                80% { opacity: 1; }
-                100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
+        for(let i=0; i<100; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 </body>
 </html>
