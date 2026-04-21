@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Archangel | System Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #030811;
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --white: #ffffff;
+            --glow: 0 0 10px #00d2ff, 0 0 20px #00d2ff, 0 0 40px #3a7bd5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden; /* Prevent scrolling during animations */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- BACKGROUND ANIMATION --- */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* --- INTRO SCREEN --- */
+        #intro-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+
+        #start-btn {
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            box-shadow: var(--glow);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #start-btn:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 30px var(--primary), 0 0 60px var(--white);
+        }
+
+        .cinematic-text {
+            position: absolute;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 2s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: center;
+            text-shadow: var(--glow);
+        }
+
+        .cinematic-text.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #jap-text {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 5rem;
+            color: var(--white);
+            letter-spacing: 15px;
+        }
+
+        #nick-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 6rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+
+        /* --- FLASHBANG EFFECT --- */
+        #flashbang {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+
+        .flash-active {
+            animation: flashAnim 3s forwards;
+        }
+
+        @keyframes flashAnim {
+            0% { opacity: 0; }
+            5% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* --- MAIN SITE --- */
+        #main-site {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, transparent 0%, #000 80%);
+        }
+
+        .container {
+            max-width: 800px;
+            text-align: center;
+            padding: 40px;
+            background: rgba(3, 8, 17, 0.7);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(58, 123, 213, 0.2);
+            backdrop-filter: blur(5px);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .avatar {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            box-shadow: var(--glow);
+            margin-bottom: 20px;
+            object-fit: cover;
+            animation: pulse 2s infinite;
+        }
+
+        /* Glitch effect for nickname */
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .glitch-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--white);
+            text-shadow: 2px 2px var(--secondary), -2px -2px var(--primary);
+            position: relative;
+        }
+
+        .glitch-title::before, .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .glitch-title::before {
+            left: 3px;
+            text-shadow: -2px 0 red;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+
+        .glitch-title::after {
+            left: -3px;
+            text-shadow: -2px 0 blue;
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        .tags {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 8px 15px;
+            border: 1px solid var(--primary);
+            background: rgba(0, 210, 255, 0.1);
+            border-radius: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            box-shadow: 0 0 5px var(--primary);
+            transition: 0.3s;
+        }
+
+        .tag:hover {
+            background: var(--primary);
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        .tag.gray { border-color: #888; color: #aaa; box-shadow: 0 0 5px #888;}
+        .tag.yellow { border-color: #ffd700; color: #ffd700; box-shadow: 0 0 5px #ffd700;}
+
+        .bio-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #ccc;
+            text-align: left;
+            border-left: 3px solid var(--primary);
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .bio-text::before {
+            content: '>';
+            position: absolute;
+            left: -15px;
+            color: var(--primary);
+            animation: blink 1s infinite;
+        }
+
+        .highlight {
+            color: var(--white);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--white);
+        }
+
+        /* Animations */
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 10px var(--primary); } 50% { box-shadow: 0 0 30px var(--primary), 0 0 20px var(--white); } 100% { box-shadow: 0 0 10px var(--primary); } }
+        
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 80% 0); }
+            20% { clip-path: inset(60% 0 10% 0); }
+            40% { clip-path: inset(40% 0 50% 0); }
+            60% { clip-path: inset(80% 0 5% 0); }
+            80% { clip-path: inset(10% 0 70% 0); }
+            100% { clip-path: inset(30% 0 20% 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(10% 0 60% 0); }
+            20% { clip-path: inset(80% 0 5% 0); }
+            40% { clip-path: inset(30% 0 40% 0); }
+            60% { clip-path: inset(50% 0 20% 0); }
+            80% { clip-path: inset(5% 0 80% 0); }
+            100% { clip-path: inset(70% 0 10% 0); }
+        }
+        
+        /* Scanlines */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 99;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" loop>
+        <source src="track.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="intro-screen">
+        <button id="start-btn">[ INITIATE CONNECTION ]</button>
+        
+        <h1 id="jap-text" class="cinematic-text">最高の天使</h1>
+        <h2 id="nick-text" class="cinematic-text" style="margin-top: 150px;">Elite Archangel</h2>
+    </div>
+
+    <div id="flashbang"></div>
+
+    <div id="main-site">
+        <canvas id="matrix"></canvas>
+
+        <div class="container">
+            <img src="avatar.png" alt="EliteArchangel" class="avatar">
+            
+            <div class="glitch-wrapper">
+                <h1 class="glitch-title" data-text="EliteArchangel">EliteArchangel</h1>
+            </div>
+
+            <div class="tags">
+                <span class="tag gray">Gray Hat</span>
+                <span class="tag yellow">Yellow Hat</span>
+                <span class="tag">OSINT</span>
+                <span class="tag">Full-Stack</span>
+            </div>
+
+            <div class="bio-text">
+                <p>Инициализация профиля... <span class="highlight">[УСПЕШНО]</span></p>
+                <br>
+                <p>Специалист в области кибербезопасности и разработки. Работаю в спектре <span class="highlight">Gray/Yellow Hat</span>.</p>
+                <p>Компетенции:</p>
+                <ul style="margin-left: 20px; margin-top: 10px; color: var(--primary);">
+                    <li>Глубокий поиск уязвимостей (Bug Bounty)</li>
+                    <li>Разработка сайтов и GameDev (Web/Native)</li>
+                    <li>Создание специализированного ПО для удаленного доступа</li>
+                    <li>Продвинутая OSINT разведка</li>
+                </ul>
+                <br>
+                <p style="color: #666;">// Системный статус: АКТИВЕН // Ожидание команд...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ЛОГИКА ИНТРО И ФЛЕШКИ
+        const startBtn = document.getElementById('start-btn');
+        const introScreen = document.getElementById('intro-screen');
+        const japText = document.getElementById('jap-text');
+        const nickText = document.getElementById('nick-text');
+        const flashbang = document.getElementById('flashbang');
+        const mainSite = document.getElementById('main-site');
+        const audio = document.getElementById('bgm');
+
+        startBtn.addEventListener('click', () => {
+            // Включаем музыку
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio play failed:", e));
+
+            startBtn.style.display = 'none';
+
+            // 1. Показываем Японский текст
+            setTimeout(() => {
+                japText.classList.add('show');
+            }, 500);
+
+            // 2. Показываем Никнейм
+            setTimeout(() => {
+                nickText.classList.add('show');
+            }, 2500);
+
+            // 3. Бросаем флешку
+            setTimeout(() => {
+                flashbang.classList.add('flash-active');
+            }, 4500);
+
+            // 4. Во время ослепления меняем экраны
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+                mainSite.style.display = 'flex';
+                initMatrix(); // Запускаем матрицу на фоне
+            }, 4600); // 100мс после начала флешки, когда экран белый
+        });
+
+        // АНИМАЦИЯ ФОНА (КАТАКАНА И БИНАРНЫЙ КОД)
+        function initMatrix() {
+            const canvas = document.getElementById('matrix');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
+            const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const nums = '01';
+            const alphabet = katakana + latin + nums;
+
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+
+            const rainDrops = [];
+            for (let x = 0; x < columns; x++) {
+                rainDrops[x] = 1;
+            }
+
+            const draw = () => {
+                ctx.fillStyle = 'rgba(3, 8, 17, 0.05)'; // Fade effect
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#00d2ff'; // Cyan text color
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < rainDrops.length; i++) {
+                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                    if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        rainDrops[i] = 0;
+                    }
+                    rainDrops[i]++;
+                }
+            };
+
+            setInterval(draw, 30);
+        }
+
+        // Обновление размера канваса при ресайзе окна
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('matrix');
+            if(canvas.width) { // если уже запущен
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+    </script>
+</body>
+</html>
