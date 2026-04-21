@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Archangel | System Access</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Elite Archangel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;800&family=Noto+Sans+JP:wght@300;700&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #030811;
-            --primary: #00d2ff;
-            --secondary: #3a7bd5;
-            --white: #ffffff;
-            --glow: 0 0 10px #00d2ff, 0 0 20px #00d2ff, 0 0 40px #3a7bd5;
+            --bg-color: #030508;
+            --accent: #e0e6ed;
+            --blue-glow: #1a4a76;
+            --text-main: #d1d5db;
         }
 
         * {
@@ -22,23 +21,30 @@
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--primary);
-            font-family: 'Share Tech Mono', monospace;
-            overflow: hidden; /* Prevent scrolling during animations */
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
             height: 100vh;
             width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* --- BACKGROUND ANIMATION --- */
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        /* --- АНИМИРОВАННЫЙ ФОН --- */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: 0;
-            opacity: 0.4;
+            background: radial-gradient(circle at 15% 50%, rgba(26, 74, 118, 0.15), transparent 25%),
+                        radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.05), transparent 25%);
+            animation: bgShift 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes bgShift {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
         }
 
         /* --- INTRO SCREEN --- */
@@ -51,36 +57,51 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
-            transition: opacity 0.5s ease;
         }
 
-        #start-btn {
-            padding: 15px 30px;
-            font-size: 1.5rem;
+        .btn-glow {
+            padding: 15px 40px;
+            font-size: 1rem;
             font-family: 'Orbitron', sans-serif;
-            background: transparent;
-            color: var(--primary);
-            border: 2px solid var(--primary);
+            letter-spacing: 3px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
             cursor: pointer;
-            box-shadow: var(--glow);
-            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
         }
 
-        #start-btn:hover {
-            background: var(--primary);
-            color: #000;
-            box-shadow: 0 0 30px var(--primary), 0 0 60px var(--white);
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.6s ease;
+        }
+
+        .btn-glow:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-glow:hover::before {
+            transform: translate(-50%, -50%) scale(1);
         }
 
         .cinematic-text {
             position: absolute;
             opacity: 0;
-            transform: scale(0.8);
-            transition: all 2s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: scale(0.9);
+            transition: all 2.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             text-align: center;
-            text-shadow: var(--glow);
         }
 
         .cinematic-text.show {
@@ -90,21 +111,26 @@
 
         #jap-text {
             font-family: 'Noto Sans JP', sans-serif;
-            font-size: 5rem;
-            color: var(--white);
-            letter-spacing: 15px;
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 20px;
+            font-weight: 300;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
 
         #nick-text {
             font-family: 'Orbitron', sans-serif;
-            font-size: 6rem;
+            font-size: 5rem;
             font-weight: 900;
-            color: var(--primary);
-            margin-top: 20px;
+            background: linear-gradient(45deg, #fff, #5a8bb8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 180px;
+            letter-spacing: 5px;
             text-transform: uppercase;
         }
 
-        /* --- FLASHBANG EFFECT --- */
+        /* --- FLASHBANG --- */
         #flashbang {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -112,177 +138,149 @@
             z-index: 999;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.1s;
+            transition: opacity 0.8s ease-out;
         }
 
-        .flash-active {
-            animation: flashAnim 3s forwards;
-        }
-
-        @keyframes flashAnim {
-            0% { opacity: 0; }
-            5% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* --- MAIN SITE --- */
+        /* --- MAIN SITE & GLASSMORPHISM --- */
         #main-site {
             position: relative;
             z-index: 10;
-            width: 100%;
-            height: 100%;
             display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle at center, transparent 0%, #000 80%);
+            opacity: 0;
+            transition: opacity 2s ease-in;
+            perspective: 1000px; /* Для 3D эффекта */
         }
 
-        .container {
-            max-width: 800px;
-            text-align: center;
-            padding: 40px;
-            background: rgba(3, 8, 17, 0.7);
-            border: 1px solid rgba(0, 210, 255, 0.3);
+        .glass-card {
+            width: 700px;
+            padding: 50px;
+            background: rgba(15, 20, 30, 0.4);
             border-radius: 20px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(58, 123, 213, 0.2);
-            backdrop-filter: blur(5px);
-            animation: float 6s ease-in-out infinite;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        .avatar-container {
+            position: relative;
+            transform: translateZ(50px); /* Выдвигаем вперед в 3D */
+            margin-bottom: 25px;
         }
 
         .avatar {
-            width: 180px;
-            height: 180px;
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
-            border: 3px solid var(--primary);
-            box-shadow: var(--glow);
-            margin-bottom: 20px;
             object-fit: cover;
-            animation: pulse 2s infinite;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s ease;
         }
 
-        /* Glitch effect for nickname */
-        .glitch-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        .glitch-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--white);
-            text-shadow: 2px 2px var(--secondary), -2px -2px var(--primary);
-            position: relative;
-        }
-
-        .glitch-title::before, .glitch-title::after {
-            content: attr(data-text);
+        .avatar-container::after {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            z-index: -1;
+            animation: spin 4s linear infinite;
         }
 
-        .glitch-title::before {
-            left: 3px;
-            text-shadow: -2px 0 red;
-            animation: glitch-anim-1 2s infinite linear alternate-reverse;
-        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .glitch-title::after {
-            left: -3px;
-            text-shadow: -2px 0 blue;
-            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 2px;
+            transform: translateZ(40px);
+            margin-bottom: 20px;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
         .tags {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 35px;
+            transform: translateZ(30px);
         }
 
         .tag {
-            padding: 8px 15px;
-            border: 1px solid var(--primary);
-            background: rgba(0, 210, 255, 0.1);
-            border-radius: 4px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
             text-transform: uppercase;
-            box-shadow: 0 0 5px var(--primary);
-            transition: 0.3s;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            transition: all 0.3s ease;
         }
 
         .tag:hover {
-            background: var(--primary);
-            color: #000;
-            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
-        .tag.gray { border-color: #888; color: #aaa; box-shadow: 0 0 5px #888;}
-        .tag.yellow { border-color: #ffd700; color: #ffd700; box-shadow: 0 0 5px #ffd700;}
+        .tag.gray { color: #b0b0b0; }
+        .tag.yellow { color: #e6c86e; }
 
-        .bio-text {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            color: #ccc;
+        .bio-box {
+            width: 100%;
             text-align: left;
-            border-left: 3px solid var(--primary);
-            padding-left: 20px;
+            transform: translateZ(20px);
+        }
+
+        .bio-box p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #9ba3af;
+            margin-bottom: 15px;
+        }
+
+        .bio-box span.hl {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .skills {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .skills li {
             position: relative;
+            padding-left: 25px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: #d1d5db;
         }
 
-        .bio-text::before {
-            content: '>';
+        .skills li::before {
+            content: '♦';
             position: absolute;
-            left: -15px;
-            color: var(--primary);
-            animation: blink 1s infinite;
+            left: 0;
+            color: #5a8bb8;
+            font-size: 0.8rem;
+            top: 2px;
         }
 
-        .highlight {
-            color: var(--white);
-            font-weight: bold;
-            text-shadow: 0 0 5px var(--white);
-        }
-
-        /* Animations */
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        @keyframes pulse { 0% { box-shadow: 0 0 10px var(--primary); } 50% { box-shadow: 0 0 30px var(--primary), 0 0 20px var(--white); } 100% { box-shadow: 0 0 10px var(--primary); } }
-        
-        @keyframes glitch-anim-1 {
-            0% { clip-path: inset(20% 0 80% 0); }
-            20% { clip-path: inset(60% 0 10% 0); }
-            40% { clip-path: inset(40% 0 50% 0); }
-            60% { clip-path: inset(80% 0 5% 0); }
-            80% { clip-path: inset(10% 0 70% 0); }
-            100% { clip-path: inset(30% 0 20% 0); }
-        }
-        @keyframes glitch-anim-2 {
-            0% { clip-path: inset(10% 0 60% 0); }
-            20% { clip-path: inset(80% 0 5% 0); }
-            40% { clip-path: inset(30% 0 40% 0); }
-            60% { clip-path: inset(50% 0 20% 0); }
-            80% { clip-path: inset(5% 0 80% 0); }
-            100% { clip-path: inset(70% 0 10% 0); }
-        }
-        
-        /* Scanlines */
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 3px 100%;
-            z-index: 99;
+        /* Пылинки на фоне */
+        .particles {
+            position: absolute;
+            width: 100%; height: 100%;
             pointer-events: none;
+            z-index: 1;
         }
     </style>
 </head>
@@ -292,24 +290,25 @@
         <source src="track.mp3" type="audio/mpeg">
     </audio>
 
+    <div class="bg-animation"></div>
+    <div class="particles" id="particles"></div>
+
     <div id="intro-screen">
-        <button id="start-btn">[ INITIATE CONNECTION ]</button>
+        <button class="btn-glow" id="start-btn">Initiate</button>
         
-        <h1 id="jap-text" class="cinematic-text">最高の天使</h1>
-        <h2 id="nick-text" class="cinematic-text" style="margin-top: 150px;">Elite Archangel</h2>
+        <h1 id="jap-text" class="cinematic-text">機密アクセス</h1>
+        <h2 id="nick-text" class="cinematic-text">Elite Archangel</h2>
     </div>
 
     <div id="flashbang"></div>
 
     <div id="main-site">
-        <canvas id="matrix"></canvas>
-
-        <div class="container">
-            <img src="avatar.png" alt="EliteArchangel" class="avatar">
-            
-            <div class="glitch-wrapper">
-                <h1 class="glitch-title" data-text="EliteArchangel">EliteArchangel</h1>
+        <div class="glass-card" id="card">
+            <div class="avatar-container">
+                <img src="avatar.png" alt="EliteArchangel" class="avatar">
             </div>
+            
+            <h1 class="title">EliteArchangel</h1>
 
             <div class="tags">
                 <span class="tag gray">Gray Hat</span>
@@ -318,25 +317,20 @@
                 <span class="tag">Full-Stack</span>
             </div>
 
-            <div class="bio-text">
-                <p>Инициализация профиля... <span class="highlight">[УСПЕШНО]</span></p>
-                <br>
-                <p>Специалист в области кибербезопасности и разработки. Работаю в спектре <span class="highlight">Gray/Yellow Hat</span>.</p>
-                <p>Компетенции:</p>
-                <ul style="margin-left: 20px; margin-top: 10px; color: var(--primary);">
-                    <li>Глубокий поиск уязвимостей (Bug Bounty)</li>
-                    <li>Разработка сайтов и GameDev (Web/Native)</li>
-                    <li>Создание специализированного ПО для удаленного доступа</li>
-                    <li>Продвинутая OSINT разведка</li>
+            <div class="bio-box">
+                <p>Специалист в области информационной безопасности и <span class="hl">Full-Stack</span> разработки. Оперирую в спектре <span class="hl">Gray</span> и <span class="hl">Yellow Hat</span>, балансируя между исследованием уязвимостей и созданием архитектуры.</p>
+                
+                <ul class="skills">
+                    <li>Глубокий поиск уязвимостей и аудит систем</li>
+                    <li>Комплексная разработка сайтов и GameDev</li>
+                    <li>Проектирование ПО для удаленного доступа</li>
+                    <li>Продвинутая OSINT-разведка и сбор данных</li>
                 </ul>
-                <br>
-                <p style="color: #666;">// Системный статус: АКТИВЕН // Ожидание команд...</p>
             </div>
         </div>
     </div>
 
     <script>
-        // ЛОГИКА ИНТРО И ФЛЕШКИ
         const startBtn = document.getElementById('start-btn');
         const introScreen = document.getElementById('intro-screen');
         const japText = document.getElementById('jap-text');
@@ -345,86 +339,91 @@
         const mainSite = document.getElementById('main-site');
         const audio = document.getElementById('bgm');
 
+        // Тайминги анимации
         startBtn.addEventListener('click', () => {
-            // Включаем музыку
-            audio.volume = 0.5;
-            audio.play().catch(e => console.log("Audio play failed:", e));
-
+            // Прячем кнопку
             startBtn.style.display = 'none';
 
-            // 1. Показываем Японский текст
-            setTimeout(() => {
-                japText.classList.add('show');
-            }, 500);
+            // Безопасный запуск аудио
+            try {
+                audio.volume = 0.6;
+                let playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => console.log("Аудио не найдено или заблокировано, продолжаем визуал."));
+                }
+            } catch(e) {}
 
-            // 2. Показываем Никнейм
-            setTimeout(() => {
-                nickText.classList.add('show');
-            }, 2500);
+            // 1. Появление иероглифов
+            setTimeout(() => { japText.classList.add('show'); }, 300);
 
-            // 3. Бросаем флешку
-            setTimeout(() => {
-                flashbang.classList.add('flash-active');
-            }, 4500);
+            // 2. Появление ника
+            setTimeout(() => { nickText.classList.add('show'); }, 2500);
 
-            // 4. Во время ослепления меняем экраны
+            // 3. Флешка (Взрыв света)
+            setTimeout(() => {
+                flashbang.style.opacity = '1';
+            }, 5000);
+
+            // 4. Смена экранов (пока экран белый)
             setTimeout(() => {
                 introScreen.style.display = 'none';
                 mainSite.style.display = 'flex';
-                initMatrix(); // Запускаем матрицу на фоне
-            }, 4600); // 100мс после начала флешки, когда экран белый
+                // Плавное появление мейн сайта
+                setTimeout(() => { mainSite.style.opacity = '1'; }, 100);
+            }, 5500);
+
+            // 5. Затухание флешки
+            setTimeout(() => {
+                flashbang.style.opacity = '0';
+            }, 5600);
         });
 
-        // АНИМАЦИЯ ФОНА (КАТАКАНА И БИНАРНЫЙ КОД)
-        function initMatrix() {
-            const canvas = document.getElementById('matrix');
-            const ctx = canvas.getContext('2d');
-
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
-            const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const nums = '01';
-            const alphabet = katakana + latin + nums;
-
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-
-            const rainDrops = [];
-            for (let x = 0; x < columns; x++) {
-                rainDrops[x] = 1;
+        // 3D Эффект карточки при движении мыши (Vanilla JS)
+        const card = document.getElementById('card');
+        
+        document.addEventListener('mousemove', (e) => {
+            if (mainSite.style.display === 'flex') {
+                let xAxis = (window.innerWidth / 2 - e.pageX) / 40;
+                let yAxis = (window.innerHeight / 2 - e.pageY) / 40;
+                card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
             }
+        });
 
-            const draw = () => {
-                ctx.fillStyle = 'rgba(3, 8, 17, 0.05)'; // Fade effect
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Плавный возврат карточки, когда мышь уходит
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+            card.style.transition = 'transform 0.5s ease';
+        });
+        document.addEventListener('mouseenter', () => {
+            card.style.transition = 'transform 0.1s ease-out';
+        });
 
-                ctx.fillStyle = '#00d2ff'; // Cyan text color
-                ctx.font = fontSize + 'px monospace';
-
-                for (let i = 0; i < rainDrops.length; i++) {
-                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-                    ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
-
-                    if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        rainDrops[i] = 0;
-                    }
-                    rainDrops[i]++;
-                }
-            };
-
-            setInterval(draw, 30);
+        // Простая генерация пылинок на фоне
+        const particlesContainer = document.getElementById('particles');
+        for(let i=0; i<30; i++) {
+            let div = document.createElement('div');
+            div.style.position = 'absolute';
+            div.style.width = Math.random() * 3 + 'px';
+            div.style.height = div.style.width;
+            div.style.background = 'rgba(255,255,255,0.3)';
+            div.style.borderRadius = '50%';
+            div.style.top = Math.random() * 100 + 'vh';
+            div.style.left = Math.random() * 100 + 'vw';
+            div.style.animation = `floatParticle ${Math.random() * 10 + 10}s linear infinite`;
+            particlesContainer.appendChild(div);
         }
 
-        // Обновление размера канваса при ресайзе окна
-        window.addEventListener('resize', () => {
-            const canvas = document.getElementById('matrix');
-            if(canvas.width) { // если уже запущен
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+        // Добавляем стили для пылинок динамически
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes floatParticle {
+                0% { transform: translateY(0) translateX(0); opacity: 0; }
+                20% { opacity: 1; }
+                80% { opacity: 1; }
+                100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
             }
-        });
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
