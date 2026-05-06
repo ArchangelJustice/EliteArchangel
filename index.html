@@ -2,114 +2,247 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Archangel | 最高の天使</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Cinzel:wght@500;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Archangel Justice | 最高の天使</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Cinzel:wght@500;700;900&family=Permanent+Marker&display=swap" rel="stylesheet">
     
     <style>
+        /* =========================================
+           CORE ARCHITECTURE & VARIABLES
+           ========================================= */
         :root {
-            --sakura-pink: #ffb7c5;
-            --sakura-dark: #b56576;
-            --angel-blue: #a0c4ff;
-            --dark-bg: #050508;
-            --card-bg: rgba(15, 15, 20, 0.7);
-            --text-light: #e0e0e0;
-            --white: #ffffff;
-            --glow-sakura: 0 0 20px rgba(255, 183, 197, 0.4);
-            --glow-blue: 0 0 30px rgba(160, 196, 255, 0.3);
+            /* Palette: Monochromatic Angelic Dark */
+            --bg-absolute: #020202;
+            --bg-dark: #0a0a0d;
+            
+            --white-pure: #ffffff;
+            --white-dim: #e0e0e0;
+            --white-smoke: rgba(255, 255, 255, 0.85); /* New heavy smoke variable */
+            --gray-text: #a0a0a0;
+            --border-dim: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(255, 255, 255, 0.3);
+            
+            --card-bg: rgba(12, 12, 15, 0.75);
+            --card-bg-hover: rgba(18, 18, 22, 0.95);
+
+            /* Divine Glows & FX */
+            --glow-halo: 0 0 35px rgba(255, 255, 255, 0.9), inset 0 0 20px rgba(255, 255, 255, 0.6);
+            --glow-text: 0 0 20px rgba(255, 255, 255, 0.6);
+            --glow-card: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 255, 255, 0.08);
+            --glow-card-hover: 0 25px 60px rgba(0, 0, 0, 1), 0 0 50px rgba(255, 255, 255, 0.25);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--dark-bg);
-            color: var(--text-light);
+            background-color: var(--bg-absolute);
+            color: var(--white-dim);
             font-family: 'Noto Serif JP', serif;
-            overflow: hidden; /* Заблокировано до клика */
+            overflow: hidden; /* Lock until click */
             scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            width: 100%;
+            position: relative;
         }
 
-        /* --- ФОН И САКУРА --- */
-        #bg-canvas {
+        /* =========================================
+           GLOBAL ANIMATIONS LAYER
+           ========================================= */
+        @keyframes floatLevitation {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes scanlineSweep {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100vh; }
+        }
+
+        @keyframes tagPulse {
+            0% { box-shadow: inset 0 0 10px rgba(0,0,0,1), 0 0 0px rgba(255,255,255,0); border-color: var(--border-dim); }
+            50% { box-shadow: inset 0 0 5px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); }
+            100% { box-shadow: inset 0 0 10px rgba(0,0,0,1), 0 0 0px rgba(255,255,255,0); border-color: var(--border-dim); }
+        }
+
+        @keyframes cardGlowSweep {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* =========================================
+           SCANLINE OVERLAY
+           ========================================= */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
+            background-size: 100% 4px;
+            z-index: 900;
+            pointer-events: none;
+            opacity: 0.35;
+            animation: scanlineSweep 10s linear infinite;
+        }
+
+        /* =========================================
+           BACKGROUND & DOM CLOUD ENGINE (UPGRADED)
+           ========================================= */
+        #cloud-engine-container {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
+            z-index: 0; 
+            pointer-events: none;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, var(--bg-dark) 0%, var(--bg-absolute) 100%);
+        }
+
+        .dom-cloud {
+            position: absolute;
+            border-radius: 50%;
+            /* Decreased blur slightly to make clouds look more solid and thick */
+            filter: blur(35px); 
+            opacity: 0;
+            pointer-events: none;
+            will-change: transform, opacity;
+            mix-blend-mode: screen; /* Helps bright whites pop against dark bg */
+        }
+
+        #ash-engine-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: 1;
             pointer-events: none;
+            overflow: hidden;
+        }
+
+        .ash-particle {
+            position: absolute;
+            background: var(--white-pure);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--white-pure), 0 0 20px var(--white-pure);
+            pointer-events: none;
+            will-change: transform, opacity;
         }
 
         .ambient-light {
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 80vw; height: 80vh;
-            background: radial-gradient(circle, rgba(160,196,255,0.05) 0%, rgba(0,0,0,0) 70%);
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0) 70%);
             z-index: 2;
             pointer-events: none;
+            animation: pulseLight 6s ease-in-out infinite alternate;
         }
 
-        /* Декоративный круг как на аве */
+        @keyframes pulseLight {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.85); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+        }
+
+        /* =========================================
+           MAGIC CIRCLE & KANJI
+           ========================================= */
         .magic-circle {
             position: fixed;
             top: 50%; left: 50%;
-            width: 800px; height: 800px;
-            margin-top: -400px; margin-left: -400px;
-            border: 1px solid rgba(255,255,255,0.05);
+            width: 850px; height: 850px;
+            margin-top: -425px; margin-left: -425px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             z-index: 1;
             pointer-events: none;
-            animation: spin 60s linear infinite;
+            animation: spinCircle 100s linear infinite;
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.9), 0 0 40px rgba(255,255,255,0.04);
         }
+        
         .magic-circle::before {
             content: ''; position: absolute;
-            top: 20px; left: 20px; right: 20px; bottom: 20px;
-            border: 1px dashed rgba(255, 183, 197, 0.1);
+            top: 30px; left: 30px; right: 30px; bottom: 30px;
+            border: 2px dashed rgba(255, 255, 255, 0.25);
             border-radius: 50%;
-            animation: spin 40s linear infinite reverse;
+            animation: spinCircle 70s linear infinite reverse;
+        }
+        
+        .magic-circle::after {
+            content: ''; position: absolute;
+            top: -15px; left: -15px; right: -15px; bottom: -15px;
+            border: 2px dotted rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: spinCircle 150s linear infinite;
         }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spinCircle { 100% { transform: rotate(360deg); } }
 
-        /* Вертикальный японский текст на фоне */
         .bg-kanji {
             position: fixed;
-            top: 10%; right: 5%;
-            font-size: 8rem;
-            color: rgba(255,255,255,0.02);
+            top: 5%; right: 4%;
+            font-size: clamp(4rem, 8vw, 7rem); 
+            color: rgba(255, 255, 255, 0.06);
             writing-mode: vertical-rl;
             text-orientation: upright;
             z-index: 1;
             font-weight: 900;
-            letter-spacing: 20px;
+            letter-spacing: 25px;
             pointer-events: none;
+            text-shadow: 0 0 30px rgba(255,255,255,0.05);
+            animation: kanjiFloat 8s ease-in-out infinite alternate, textGlitch 15s infinite;
         }
 
-        /* --- ИНТРО --- */
+        @keyframes kanjiFloat {
+            0% { transform: translateY(0) scale(1); filter: brightness(1); }
+            100% { transform: translateY(50px) scale(1.05); filter: brightness(1.5); }
+        }
+
+        /* =========================================
+           INTRO SCREEN
+           ========================================= */
         #intro-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark-bg);
+            background: var(--bg-absolute);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            transition: opacity 1.5s ease-in-out;
+            transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.5s;
+        }
+
+        .intro-title {
+            font-family: 'Noto Serif JP', serif;
+            color: var(--white-pure);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            letter-spacing: 20px;
+            text-shadow: var(--glow-text);
+            animation: fadeInOut 2.5s infinite, glitchPulse 4s infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; text-shadow: 0 0 45px rgba(255,255,255,1); }
         }
 
         .start-trigger {
-            padding: 15px 50px;
+            padding: 20px 70px;
             font-family: 'Cinzel', serif;
-            font-size: 1.2rem;
-            color: var(--white);
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--white-pure);
+            background: rgba(0,0,0,0.8);
+            border: 1px solid var(--border-highlight);
             text-transform: uppercase;
-            letter-spacing: 8px;
+            letter-spacing: 12px;
             cursor: pointer;
-            transition: all 0.5s ease;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 25px rgba(0,0,0,0.9);
         }
 
         .start-trigger::before {
@@ -117,26 +250,32 @@
             position: absolute;
             top: 0; left: -100%;
             width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,183,197,0.4), transparent);
-            transition: 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s ease;
         }
 
         .start-trigger:hover {
-            border-color: var(--sakura-pink);
-            box-shadow: var(--glow-sakura);
-            text-shadow: 0 0 10px var(--sakura-pink);
+            border-color: var(--white-pure);
+            box-shadow: 0 0 50px rgba(255,255,255,0.4), inset 0 0 20px rgba(255,255,255,0.15);
+            text-shadow: 0 0 20px var(--white-pure);
+            transform: scale(1.1);
+            letter-spacing: 16px;
         }
 
         .start-trigger:hover::before { left: 100%; }
 
-        /* --- ГЛАВНЫЙ КОНТЕНТ (Скроллируемый) --- */
+        /* =========================================
+           MAIN WRAPPER & SECTIONS
+           ========================================= */
         #main-wrapper {
             position: relative;
             z-index: 10;
-            display: none; /* Скрыто до клика */
+            display: none;
             opacity: 0;
             flex-direction: column;
             align-items: center;
+            width: 100%;
+            overflow-x: hidden; 
         }
 
         section {
@@ -145,217 +284,407 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 100px 20px;
+            padding: 100px 15px; 
             position: relative;
         }
 
-        /* Анимация появления при скролле */
         .reveal {
             opacity: 0;
-            transform: translateY(50px);
-            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: translateY(100px) scale(0.9);
+            transition: all 1.5s cubic-bezier(0.25, 1, 0.2, 1);
+            will-change: transform, opacity;
         }
         .reveal.active {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
 
-        /* --- КАРТОЧКИ И ЭЛЕМЕНТЫ --- */
+        /* =========================================
+           GLASS PANELS & CARDS (WITH LEVITATION)
+           ========================================= */
         .glass-panel {
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-top: 1px solid rgba(255, 183, 197, 0.2);
-            padding: 50px;
-            border-radius: 15px;
-            max-width: 700px;
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border: 1px solid var(--border-dim);
+            border-top: 1px solid var(--border-highlight);
+            padding: 60px 40px; 
+            border-radius: 20px;
+            max-width: 850px;
             width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: var(--glow-card);
             position: relative;
-            transition: transform 0.3s ease;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+            margin: 0 auto;
+            animation: floatLevitation 8s ease-in-out infinite; /* Added global levitation */
+        }
+
+        @media (max-width: 768px) {
+            .glass-panel { padding: 40px 20px; animation-duration: 10s; }
         }
 
         .glass-panel:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6), var(--glow-sakura);
+            background: var(--card-bg-hover);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: var(--glow-card-hover);
+            animation-play-state: paused; /* Stop levitation on hover for stability */
         }
 
+        /* =========================================
+           AVATAR & HALO
+           ========================================= */
         .avatar-container {
             position: relative;
-            width: 220px; height: 220px;
-            margin: 0 auto 30px;
+            width: clamp(180px, 40vw, 240px); 
+            height: clamp(180px, 40vw, 240px);
+            margin: 0 auto 50px;
+            transform-style: preserve-3d;
         }
 
         .halo {
             position: absolute;
-            top: -20px; left: 50%;
-            transform: translateX(-50%);
-            width: 120px; height: 30px;
-            border: 3px solid var(--angel-blue);
+            top: -35px; left: 50%;
+            transform: translateX(-50%) rotateX(70deg);
+            width: 180px; height: 50px;
+            border: 6px solid var(--white-pure);
             border-radius: 50%;
-            box-shadow: var(--glow-blue), inset 0 0 15px var(--angel-blue);
-            animation: floatHalo 3s ease-in-out infinite;
+            box-shadow: var(--glow-halo);
+            animation: divineHalo 3s ease-in-out infinite;
+            z-index: 3;
         }
 
-        @keyframes floatHalo {
-            0%, 100% { transform: translate(-50%, 0) rotateX(70deg); }
-            50% { transform: translate(-50%, -10px) rotateX(70deg); }
+        @media (max-width: 768px) {
+            .halo { width: 130px; height: 35px; top: -25px; border-width: 4px;}
+        }
+
+        @keyframes divineHalo {
+            0%, 100% { transform: translate(-50%, 0) rotateX(70deg); box-shadow: var(--glow-halo); }
+            50% { transform: translate(-50%, -25px) rotateX(70deg) scale(1.15); box-shadow: 0 0 60px rgba(255,255,255,1), inset 0 0 35px rgba(255,255,255,0.9); }
         }
 
         .avatar {
             width: 100%; height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.1);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            border: 2px solid rgba(255,255,255,0.25);
+            box-shadow: 0 0 60px rgba(0,0,0,1);
             position: relative;
             z-index: 2;
-            transition: 0.5s;
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            filter: grayscale(100%) contrast(125%);
         }
         
         .avatar:hover {
-            border-color: var(--sakura-pink);
-            box-shadow: var(--glow-sakura);
+            border-color: var(--white-pure);
+            box-shadow: 0 0 50px rgba(255,255,255,0.5);
+            filter: grayscale(50%) contrast(150%);
+            transform: scale(1.08) translateY(-15px);
         }
 
-        .title-group { text-align: center; margin-bottom: 30px; }
+        /* =========================================
+           TYPOGRAPHY & TAGS (TEXT WRAP FIX)
+           ========================================= */
+        .title-group { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
         .jap-subtitle {
             font-family: 'Noto Serif JP', serif;
-            color: var(--sakura-dark);
-            font-size: 1.2rem;
-            letter-spacing: 5px;
-            margin-bottom: 5px;
+            color: var(--gray-text);
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            letter-spacing: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(255,255,255,0.2);
+            animation: pulseStatus 4s infinite alternate;
         }
 
         h1.name {
             font-family: 'Permanent Marker', cursive;
-            font-size: 4rem;
-            color: var(--white);
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            /* CLAMP FUNCTION with safe limits */
+            font-size: clamp(1.6rem, 7vw, 4.5rem); 
+            color: var(--white-pure);
+            text-shadow: 0 5px 25px rgba(0,0,0,1), 0 0 30px rgba(255,255,255,0.4);
             line-height: 1.2;
+            letter-spacing: 2px;
+            position: relative;
+            display: block; 
+            width: 100%;
+            /* THE FIX: Allow natural break, but control WHERE it breaks using <wbr> in HTML */
+            word-break: normal; 
+            overflow-wrap: normal;
+            padding: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        h1.name:hover {
+            animation: textGlitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+            text-shadow: 0 0 40px rgba(255,255,255,0.8);
+        }
+
+        @keyframes textGlitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-3px, 3px) }
+            40% { transform: translate(-3px, -3px) }
+            60% { transform: translate(3px, 3px) }
+            80% { transform: translate(3px, -3px) }
+            100% { transform: translate(0) }
         }
 
         .tags {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 40px;
+            gap: 12px;
+            margin-bottom: 50px;
+            width: 100%;
         }
 
         .tag {
-            padding: 8px 20px;
+            padding: 12px 28px;
             font-family: 'Cinzel', serif;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-light);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 30px;
-            background: rgba(0,0,0,0.3);
-            letter-spacing: 2px;
-            transition: 0.3s;
-            cursor: default;
+            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+            font-weight: 900;
+            color: var(--gray-text);
+            border: 1px solid var(--border-dim);
+            border-radius: 6px;
+            background: rgba(0,0,0,0.8);
+            letter-spacing: 4px;
+            transition: all 0.5s ease;
+            cursor: crosshair;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,1);
+            animation: tagPulse 4s infinite alternate;
+        }
+
+        /* Stagger tag animations */
+        .tag:nth-child(1) { animation-delay: 0s; }
+        .tag:nth-child(2) { animation-delay: 1s; }
+        .tag:nth-child(3) { animation-delay: 2s; }
+        .tag:nth-child(4) { animation-delay: 3s; }
+
+        .tag::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
         }
 
         .tag:hover {
-            border-color: var(--angel-blue);
-            color: var(--white);
-            box-shadow: var(--glow-blue);
-            transform: translateY(-2px);
+            border-color: var(--white-pure);
+            color: var(--bg-absolute);
+            background: var(--white-pure);
+            box-shadow: 0 0 25px rgba(255,255,255,0.8);
+            transform: translateY(-5px) scale(1.08);
+            animation-play-state: paused;
         }
 
+        .tag:hover::after { left: 100%; }
+
         .content-text {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #b0b0b0;
+            font-size: clamp(1rem, 3vw, 1.15rem);
+            line-height: 2;
+            color: var(--white-dim);
             text-align: center;
+            font-weight: 400;
+            padding: 0 15px;
         }
 
         .content-text strong {
-            color: var(--white);
+            color: var(--white-pure);
             font-weight: 700;
-            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+            text-shadow: 0 0 15px rgba(255,255,255,0.6);
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        
+        .content-text strong:hover {
+            text-shadow: 0 0 25px rgba(255,255,255,1);
+            color: #fff;
         }
 
         .divider {
-            width: 50px;
-            height: 2px;
-            background: var(--sakura-dark);
-            margin: 30px auto;
-            border-radius: 2px;
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--white-pure), transparent);
+            margin: 45px auto;
+            opacity: 0.8;
+            box-shadow: 0 0 15px rgba(255,255,255,0.7);
         }
 
         .status {
             text-align: center;
             font-family: 'Cinzel', serif;
-            color: var(--angel-blue);
-            font-size: 0.9rem;
-            letter-spacing: 4px;
-            margin-top: 40px;
-            opacity: 0.7;
+            color: var(--white-pure);
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            letter-spacing: 6px;
+            margin-top: 45px;
+            opacity: 0.6;
+            animation: pulseStatus 2.5s infinite alternate;
         }
 
-        /* --- ВТОРАЯ СЕКЦИЯ (Пример контента) --- */
+        /* =========================================
+           SKILLS & METHODOLOGY GRIDS
+           ========================================= */
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
         .skill-card {
-            background: rgba(10,10,15,0.6);
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 30px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(15, 15, 20, 0.9), rgba(5, 5, 8, 0.9));
+            background-size: 200% 200%;
+            border: 1px solid var(--border-dim);
+            padding: 45px 30px;
+            border-radius: 16px;
             text-align: center;
-            transition: 0.4s;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.9), 0 10px 25px rgba(0,0,0,0.6);
+        }
+
+        .skill-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 0;
+            background: var(--white-pure);
+            transition: height 0.6s ease;
+            box-shadow: 0 0 20px var(--white-pure);
         }
 
         .skill-card h3 {
             font-family: 'Cinzel', serif;
-            color: var(--sakura-pink);
-            margin-bottom: 15px;
-            letter-spacing: 2px;
+            color: var(--white-pure);
+            margin-bottom: 25px;
+            letter-spacing: 4px;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            transition: all 0.3s;
         }
 
         .skill-card:hover {
-            background: rgba(20,20,25,0.8);
-            border-color: var(--sakura-pink);
-            transform: scale(1.05);
+            background: linear-gradient(135deg, rgba(25, 25, 32, 0.95), rgba(10, 10, 15, 0.95));
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-20px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(0,0,0,1), inset 0 0 30px rgba(255,255,255,0.15);
+            animation: cardGlowSweep 3s ease infinite;
         }
 
-        /* Стилизация скроллбара */
+        .skill-card:hover h3 { text-shadow: 0 0 25px rgba(255,255,255,0.8); letter-spacing: 6px; }
+        .skill-card:hover::before { height: 100%; }
+
+        .methodology-title {
+            font-family: 'Cinzel', serif;
+            color: var(--white-pure);
+            text-align: center;
+            margin-bottom: 50px;
+            letter-spacing: 8px;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            text-shadow: 0 0 25px rgba(255,255,255,0.5);
+            position: relative;
+        }
+
+        .methodology-text {
+            text-align: left;
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            color: var(--white-dim);
+            line-height: 2.1;
+        }
+
+        .methodology-text p {
+            transition: transform 0.4s ease, color 0.4s ease, background 0.4s ease;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 1px solid transparent;
+        }
+
+        .methodology-text p:hover {
+            background: rgba(255,255,255,0.03);
+            border-left: 1px solid rgba(255,255,255,0.2);
+            transform: translateX(15px);
+            color: var(--white-pure);
+            box-shadow: inset 20px 0 30px -30px rgba(255,255,255,0.3);
+        }
+
+        .methodology-text strong {
+            font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+            color: var(--white-pure);
+            font-family: 'Cinzel', serif;
+            letter-spacing: 3px;
+            display: block;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--white-pure);
+            padding-left: 20px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+            text-shadow: 0 0 15px rgba(255,255,255,0.4);
+            transition: all 0.3s;
+        }
+        
+        .methodology-text p:hover strong {
+            text-shadow: 0 0 25px rgba(255,255,255,0.8);
+            letter-spacing: 5px;
+            border-left-width: 6px;
+        }
+
+        /* =========================================
+           SCROLLBAR STYLING
+           ========================================= */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--dark-bg); }
-        ::-webkit-scrollbar-thumb { background: var(--sakura-dark); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--sakura-pink); }
+        ::-webkit-scrollbar-track { background: var(--bg-absolute); }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(255,255,255,0.3); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.7); }
 
     </style>
 </head>
 <body>
 
+    <div class="scanlines"></div>
+
+    <!-- Audio System -->
     <audio id="music" loop>
         <source src="track.mp3" type="audio/mpeg">
     </audio>
 
-    <canvas id="bg-canvas"></canvas>
+    <!-- Heavy Cloud Engine Container -->
+    <div id="cloud-engine-container"></div>
+    
+    <!-- Angelic Ash Particle System -->
+    <div id="ash-engine-container"></div>
+    
     <div class="ambient-light"></div>
     <div class="magic-circle" id="parallax-circle"></div>
     <div class="bg-kanji" id="parallax-text">最高の天使</div>
 
+    <!-- Intro Shield -->
     <div id="intro-overlay">
-        <div style="font-family: 'Noto Serif JP', serif; color: var(--sakura-pink); margin-bottom: 20px; font-size: 1.5rem; letter-spacing: 10px;">機密</div>
-        <button class="start-trigger" id="activeBtn">Awaken</button>
+        <div class="intro-title">機密</div>
+        <button class="start-trigger" id="activeBtn">System Ignite</button>
     </div>
 
+    <!-- Main Content Flow -->
     <div id="main-wrapper">
         
+        <!-- Section 1: Hero Identity -->
         <section id="hero">
-            <div class="glass-panel reveal parallax-element">
+            <div class="glass-panel reveal parallax-element js-tilt">
                 <div class="avatar-container">
                     <div class="halo"></div>
                     <img src="avatar.png" class="avatar" alt="Elite Archangel">
@@ -363,19 +692,20 @@
                 
                 <div class="title-group">
                     <div class="jap-subtitle">最高の天使</div>
-                    <h1 class="name">Elite Archangel</h1>
+                    <!-- THE FIX: <wbr> tags injected to control text wrap logically -->
+                    <h1 class="name">Elite<wbr>Archangel<wbr>Justice</h1>
                 </div>
                 
                 <div class="tags">
-                    <span class="tag">GRAY HAT</span>
-                    <span class="tag">YELLOW HAT</span>
+                    <span class="tag">BLUE TEAMING</span>
                     <span class="tag">OSINT FULLSTACK</span>
                     <span class="tag">SYSTEM ARCHITECT</span>
+                    <span class="tag">DEFENSE PRO</span>
                 </div>
 
                 <div class="content-text">
                     Я — независимый исследователь безопасности и <strong>Full-stack разработчик</strong>. <br>
-                    Мое искусство заключается в создании элегантного кода и нахождении скрытых уязвимостей в архитектуре сложных веб-систем.
+                    Мое искусство заключается в создании элегантного кода и построении неприступной архитектуры сложных веб-систем.
                 </div>
 
                 <div class="divider"></div>
@@ -384,40 +714,39 @@
             </div>
         </section>
 
+        <!-- Section 2: Arsenal -->
         <section id="details">
-            <div style="width: 100%; max-width: 900px;">
-                <h2 class="reveal" style="text-align: center; font-family: 'Cinzel', serif; font-size: 2.5rem; margin-bottom: 50px; letter-spacing: 5px; color: var(--white);">Arsenal</h2>
+            <div style="width: 100%; max-width: 1100px; z-index: 5;">
+                <h2 class="reveal methodology-title">Arsenal</h2>
                 
                 <div class="skills-grid">
-                    <div class="skill-card reveal" style="transition-delay: 0.1s;">
-                        <h3>Vulnerability Research</h3>
-                        <p class="content-text" style="font-size: 0.9rem;">Глубокий анализ систем, поиск 0-day и критических брешей в логике приложений.</p>
+                    <div class="skill-card reveal js-tilt" style="transition-delay: 0.1s;">
+                        <h3>Defense Architecture</h3>
+                        <p class="content-text" style="font-size: 0.95rem;">Проектирование защищенных сетей, аудит безопасности и устранение критических уязвимостей.</p>
                     </div>
-                    <div class="skill-card reveal" style="transition-delay: 0.2s;">
+                    <div class="skill-card reveal js-tilt" style="transition-delay: 0.2s;">
                         <h3>Deep OSINT</h3>
-                        <p class="content-text" style="font-size: 0.9rem;">Сбор, аналитика и деанонимизация данных по открытым и закрытым источникам.</p>
+                        <p class="content-text" style="font-size: 0.95rem;">Сбор, аналитика и деанонимизация данных по открытым и закрытым источникам.</p>
                     </div>
-                    <div class="skill-card reveal" style="transition-delay: 0.3s;">
-                        <h3>Remote Control S/W</h3>
-                        <p class="content-text" style="font-size: 0.9rem;">Разработка кастомного софта для скрытого администрирования и мониторинга.</p>
+                    <div class="skill-card reveal js-tilt" style="transition-delay: 0.3s;">
+                        <h3>Full-Stack Dev</h3>
+                        <p class="content-text" style="font-size: 0.95rem;">Создание премиальных веб-интерфейсов и надежных backend-систем на Python/JS.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- НОВАЯ СЕКЦИЯ: OSINT, NMAP, METASPLOIT, EXPLOIT DEVELOPMENT -->
-        <!-- ========================================== -->
+        <!-- Section 3: Methodology (Fully Preserved & Animated) -->
         <section id="methods">
-            <div class="glass-panel reveal parallax-element" style="max-width: 850px;">
-                <h2 style="font-family: 'Cinzel', serif; color: var(--sakura-pink); text-align: center; margin-bottom: 30px; letter-spacing: 4px;">МЕТОДОЛОГИЯ</h2>
-                <div class="content-text" style="text-align: left; font-size: 1rem;">
+            <div class="glass-panel reveal parallax-element js-tilt" style="max-width: 950px;">
+                <h2 class="methodology-title">МЕТОДОЛОГИЯ</h2>
+                <div class="methodology-text">
                     
-                    <p style="margin-bottom: 20px;">
-                        <strong style="font-size: 1.2rem; color: var(--sakura-pink);">OSINT — ГЛАЗА АРХАНГЕЛА</strong><br>
+                    <p style="margin-bottom: 25px;">
+                        <strong>OSINT — ГЛАЗА АРХАНГЕЛА</strong>
                         Каждая операция начинается с разведки. Я использую мультислойную систему сбора данных: 
                         анализ цифровых следов через поисковые дорки (Google Dorks, GitHub Dorks), 
-                        парсинг утечек и баз данных, мониторинг даркнет-форумов. 
+                        парсинг утечек и баз данных, мониторинг информации. 
                         WHOIS-история, обратный DNS, Shodan и Censys помогают составить карту инфраструктуры цели. 
                         Социальные графы, корреляция никнеймов, геолокационные метаданные изображений — 
                         всё это превращает разрозненные биты информации в полную картину. 
@@ -425,193 +754,330 @@
                         и фреймворки вроде Maltego и SpiderFoot.
                     </p>
                     
-                    <div class="divider"></div>
+                    <div class="divider" style="width: 50px; margin: 20px auto;"></div>
                     
-                    <p style="margin-bottom: 20px;">
-                        <strong style="font-size: 1.2rem; color: var(--sakura-pink);">NMAP — СКАЛЬПЕЛЬ СЕТЕВОЙ РАЗВЕДКИ</strong><br>
+                    <p style="margin-bottom: 25px;">
+                        <strong>NMAP — СКАЛЬПЕЛЬ СЕТЕВОЙ РАЗВЕДКИ</strong>
                         После сбора внешних данных наступает этап активного сканирования. Nmap — мой основной инструмент 
-                        для картирования сети. Использую агрессивные тайминги, кастомные скрипты NSE для детектирования 
+                        для картирования сети. Использую точные тайминги, кастомные скрипты NSE для детектирования 
                         конкретных уязвимостей (smb-vuln-*, http-*, ssl-*), определяю версии сервисов и операционных систем. 
-                        Обход файрволов через фрагментацию пакетов, спуфинг и декоративные сканы — стандартная практика. 
+                        Анализ сетевой архитектуры и конфигураций — стандартная практика. 
                         Результаты всегда перепроверяю ручным анализом баннеров и поведенческих особенностей.
                     </p>
                     
-                    <div class="divider"></div>
+                    <div class="divider" style="width: 50px; margin: 20px auto;"></div>
                     
-                    <p style="margin-bottom: 20px;">
-                        <strong style="font-size: 1.2rem; color: var(--sakura-pink);">METASPLOIT — АРСЕНАЛ ЭКСПЛУАТАЦИИ</strong><br>
-                        Когда уязвимость подтверждена, в дело вступает Metasploit Framework. 
-                        Готовые эксплойты из базы Rapid7 — лишь вершина айсберга. 
-                        Я модифицирую существующие модули под специфику цели, настраиваю пейлоады (Meterpreter, shell_reverse_tcp), 
-                        обхожу антивирусы с помощью шифрования и обфускации (Veil-Evasion, msfvenom). 
-                        Пост-эксплуатация: сбор хешей, эскалация привилегий, lateral movement через PsExec и WMI. 
-                        Всё это позволяет провести полный цикл тестирования на проникновение в контролируемых условиях.
+                    <p style="margin-bottom: 25px;">
+                        <strong>DEFENSE — ИСКУССТВО ЗАЩИТЫ</strong>
+                        Глубокое понимание векторов атак позволяет выстраивать непробиваемую защиту. 
+                        Мониторинг логов в реальном времени, настройка систем IDS/IPS, фильтрация трафика. 
+                        Особое внимание уделяю цифровой гигиене и архитектуре безопасности веб-приложений. 
+                        Внедрение строгих политик CORS, CSP, защита от SQLi и XSS на уровне ядра приложения. 
+                        Всё это позволяет создать систему, способную выдержать любой натиск.
                     </p>
                     
-                    <div class="divider"></div>
+                    <div class="divider" style="width: 50px; margin: 20px auto;"></div>
                     
                     <p>
-                        <strong style="font-size: 1.2rem; color: var(--sakura-pink);">СОЗДАНИЕ ЭКСПЛОЙТОВ — ИСКУССТВО ИНЖЕНЕРИИ</strong><br>
-                        Когда публичные эксплойты не справляются, я пишу собственные. 
-                        Реверс-инжиниринг бинарных файлов, анализ памяти, фаззинг — всё для поиска скрытых багов. 
-                        Разрабатываю эксплойты на Python, Ruby и C для переполнения буфера, use-after-free, инъекций команд. 
-                        Особое внимание уделяю техникам обхода современных средств защиты: DEP, ASLR, Stack Canaries. 
-                        Каждый кастомный эксплойт проходит многоступенчатое тестирование в изолированной среде, 
-                        прежде чем быть использованным в реальной пентест-кампании.
+                        <strong>РАЗРАБОТКА — ИНЖЕНЕРИЯ ИДЕАЛА</strong>
+                        Я не просто нахожу уязвимости, я создаю системы с нуля. 
+                        От сложных ботов на aiogram до премиальных веб-интерфейсов.
+                        Каждый проект базируется на чистой архитектуре (SQLite, FastAPI, модульность). 
+                        Код должен быть не только безопасным, но и красивым — как внутри, так и снаружи. 
+                        Внимание к деталям, использование передовых технологий и постоянное совершенствование — 
+                        вот что делает продукт по-настоящему элитным.
                     </p>
                     
                 </div>
-                <div class="status" style="margin-top: 30px;">МЕТОДОЛОГИЯ • НЕПРЕРЫВНОЕ СОВЕРШЕНСТВОВАНИЕ</div>
+                <div class="status" style="margin-top: 50px; letter-spacing: 10px;">МЕТОДОЛОГИЯ • НЕПРЕРЫВНОЕ СОВЕРШЕНСТВОВАНИЕ</div>
             </div>
         </section>
-        <!-- ========================================== -->
-        <!-- КОНЕЦ НОВОЙ СЕКЦИИ -->
-        <!-- ========================================== -->
 
     </div>
 
+    <!-- External AnimeJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
     <script>
-        // --- ЛОГИКА ЗАПУСКА И АУДИО ---
+        /* =========================================================================
+           SYSTEM ARCHITECTURE: INITIALIZATION & AUDIO
+           ========================================================================= */
         const btn = document.getElementById('activeBtn');
         const overlay = document.getElementById('intro-overlay');
         const wrapper = document.getElementById('main-wrapper');
         const audio = document.getElementById('music');
 
         btn.addEventListener('click', () => {
-            // Плавное исчезновение интро
             overlay.style.opacity = '0';
+            overlay.style.visibility = 'hidden';
             
-            // Запуск музыки
-            audio.volume = 0.4;
-            audio.play().catch(e => console.log("Audio play prevented"));
+            audio.volume = 0.5; // Slightly louder
+            audio.play().catch(e => console.warn("[System] Audio requires user interaction."));
 
             setTimeout(() => {
                 overlay.style.display = 'none';
                 wrapper.style.display = 'flex';
-                document.body.style.overflow = 'auto'; // Включаем скролл
+                document.body.style.overflowY = 'auto'; 
+                document.body.style.overflowX = 'hidden'; 
                 
-                // Плавное появление контента
                 anime({
                     targets: '#main-wrapper',
                     opacity: [0, 1],
-                    duration: 2000,
-                    easing: 'easeOutQuad'
+                    duration: 3500,
+                    easing: 'easeOutExpo'
                 });
 
-                // Триггерим проверку скролла сразу после загрузки
                 revealOnScroll();
-            }, 1500);
+            }, 1000);
         });
 
-        // --- АНИМАЦИЯ ПРИ СКРОЛЛЕ (Intersection Observer) ---
+        /* =========================================================================
+           SYSTEM ARCHITECTURE: SCROLL OBSERVER
+           ========================================================================= */
         function revealOnScroll() {
             const reveals = document.querySelectorAll('.reveal');
             const windowHeight = window.innerHeight;
             
-            reveals.forEach(reveal => {
+            reveals.forEach((reveal, index) => {
                 const revealTop = reveal.getBoundingClientRect().top;
-                const revealPoint = 100; // Насколько рано показывать
+                const revealPoint = 100; // Trigger earlier
                 
                 if(revealTop < windowHeight - revealPoint) {
-                    reveal.classList.add('active');
+                    // Staggered reveal based on index
+                    setTimeout(() => {
+                        reveal.classList.add('active');
+                    }, index * 150);
                 }
             });
         }
-        window.addEventListener('scroll', revealOnScroll);
+        window.addEventListener('scroll', revealOnScroll, { passive: true });
+        window.addEventListener('load', revealOnScroll); // Initial check
 
-        // --- ЭФФЕКТ ПАРАЛЛАКСА МЫШЬЮ ---
-        document.addEventListener('mousemove', (e) => {
-            const x = (window.innerWidth - e.pageX * 2) / 100;
-            const y = (window.innerHeight - e.pageY * 2) / 100;
+        /* =========================================================================
+           SYSTEM ARCHITECTURE: PARALLAX & TILT
+           ========================================================================= */
+        if(window.matchMedia("(pointer: fine)").matches) {
+            document.addEventListener('mousemove', (e) => {
+                requestAnimationFrame(() => {
+                    const x = (window.innerWidth - e.pageX * 2) / 100;
+                    const y = (window.innerHeight - e.pageY * 2) / 100;
 
-            const circle = document.getElementById('parallax-circle');
-            const text = document.getElementById('parallax-text');
-            const cards = document.querySelectorAll('.parallax-element');
+                    const circle = document.getElementById('parallax-circle');
+                    const text = document.getElementById('parallax-text');
 
-            if(circle) circle.style.transform = `translate(${x * -2}px, ${y * -2}px) rotate(${e.pageX/10}deg)`;
-            if(text) text.style.transform = `translate(${x * -5}px, ${y * -5}px)`;
-            
-            cards.forEach(card => {
-                card.style.transform = `translate(${x}px, ${y}px)`;
+                    if(circle) circle.style.transform = `translate(${x * -2}px, ${y * -2}px) rotate(${e.pageX/15}deg)`;
+                    if(text) text.style.transform = `translate(${x * -3}px, ${y * -3}px)`;
+                });
             });
+
+            const tiltElements = document.querySelectorAll('.js-tilt');
+            tiltElements.forEach(el => {
+                el.addEventListener('mousemove', (e) => {
+                    const rect = el.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -5; // Intensified tilt
+                    const rotateY = ((x - centerX) / centerX) * 5;
+                    
+                    el.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    el.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                    el.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                });
+                
+                el.addEventListener('mouseenter', () => { el.style.transition = 'none'; });
+            });
+        }
+
+        /* =========================================================================
+           OOP DOM PARTICLE ENGINE: THICK CLOUDS & ASH
+           ========================================================================= */
+        class ParticleEngine {
+            constructor(containerId, count, particleClass) {
+                this.container = document.getElementById(containerId);
+                this.count = count;
+                this.ParticleClass = particleClass;
+                this.particles = [];
+                this.init();
+            }
+
+            init() {
+                for (let i = 0; i < this.count; i++) {
+                    const p = new this.ParticleClass(this.container);
+                    p.reset(true);
+                    this.particles.push(p);
+                }
+            }
+
+            updateAll() {
+                this.particles.forEach(p => p.update());
+            }
+        }
+
+        // --- SUBCLASS: HEAVY THICK CLOUDS ---
+        class SmokeParticle {
+            constructor(container) {
+                this.container = container;
+                this.element = document.createElement('div');
+                this.element.className = 'dom-cloud';
+                this.container.appendChild(this.element);
+                this.rotation = Math.random() * 360; // Added rotation state
+                this.rotSpeed = (Math.random() - 0.5) * 0.2; // Very slow rotation
+            }
+
+            reset(initial = false) {
+                const size = Math.random() * 600 + 400; // EVEN BIGGER clouds
+                this.x = Math.random() * window.innerWidth;
+                this.y = initial ? Math.random() * window.innerHeight : window.innerHeight + size;
+                this.speedY = Math.random() * 1.5 + 0.5; 
+                this.speedX = (Math.random() - 0.5) * 0.8; 
+                
+                // MASSIVE OPACITY BOOST FOR VISIBILITY
+                this.opacity = Math.random() * 0.6 + 0.3; 
+                this.scale = Math.random() * 0.6 + 0.8;
+                
+                // Solid, bright colors for the core of the cloud
+                const shades = [
+                    'rgba(255, 255, 255, 0.45)', // Pure white core
+                    'rgba(220, 220, 230, 0.4)',  // Silver white
+                    'rgba(180, 180, 190, 0.35)', // Light gray
+                    'rgba(200, 200, 200, 0.4)'
+                ];
+                const color = shades[Math.floor(Math.random() * shades.length)];
+                
+                this.element.style.width = `${size}px`;
+                this.element.style.height = `${size}px`;
+                this.element.style.background = `radial-gradient(circle, ${color} 0%, rgba(0,0,0,0) 60%)`;
+                
+                this.updateDOM();
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                this.scale += 0.0008; 
+                this.rotation += this.rotSpeed; // Apply rotation
+                
+                if (this.y < -1000 || this.x < -1000 || this.x > window.innerWidth + 1000) {
+                    this.reset();
+                }
+                this.updateDOM();
+            }
+
+            updateDOM() {
+                // Now includes rotation for a more dynamic twisting smoke effect
+                this.element.style.transform = `translate3d(${this.x}px, ${this.y}px, 0) scale(${this.scale}) rotate(${this.rotation}deg)`;
+                this.element.style.opacity = this.opacity;
+            }
+        }
+
+        // --- SUBCLASS: GLOWING ASH ---
+        class AshParticle {
+            constructor(container) {
+                this.container = container;
+                this.element = document.createElement('div');
+                this.element.className = 'ash-particle';
+                this.container.appendChild(this.element);
+            }
+
+            reset(initial = false) {
+                const size = Math.random() * 4 + 1; 
+                this.x = Math.random() * window.innerWidth;
+                this.y = initial ? Math.random() * window.innerHeight : window.innerHeight + 10;
+                this.speedY = Math.random() * 2.5 + 1.5; 
+                this.speedX = (Math.random() - 0.5) * 2.5; 
+                this.opacity = Math.random() * 0.9 + 0.3; // Brighter ash
+                
+                this.element.style.width = `${size}px`;
+                this.element.style.height = `${size}px`;
+                
+                this.updateDOM();
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX + Math.sin(this.y / 40) * 0.8; // Wavering flight
+                
+                if (this.y < -50 || this.x < -50 || this.x > window.innerWidth + 50) {
+                    this.reset();
+                }
+                this.updateDOM();
+            }
+
+            updateDOM() {
+                this.element.style.transform = `translate3d(${this.x}px, ${this.y}px, 0)`;
+                this.element.style.opacity = this.opacity;
+            }
+        }
+
+        // Initialize Dual Engines with increased particle counts
+        const isMobile = window.innerWidth < 768;
+        const cloudCount = isMobile ? 25 : 60; // Huge increase for density
+        const ashCount = isMobile ? 50 : 120; // More ash particles
+
+        const cloudEngine = new ParticleEngine('cloud-engine-container', cloudCount, SmokeParticle);
+        const ashEngine = new ParticleEngine('ash-engine-container', ashCount, AshParticle);
+
+        /* =========================================================================
+           3-TIER ANIMATION FALLBACK SYSTEM (Indestructible Render Loop)
+           ========================================================================= */
+        let engineRunning = false;
+        let intervalId = null;
+        let timeoutId = null;
+
+        function renderFrame() {
+            cloudEngine.updateAll();
+            ashEngine.updateAll();
+        }
+
+        function runEngine_rAF() {
+            if (!engineRunning) return;
+            renderFrame();
+            requestAnimationFrame(runEngine_rAF);
+        }
+
+        function runEngine_Interval() {
+            intervalId = setInterval(renderFrame, 1000 / 60);
+        }
+
+        function runEngine_Timeout() {
+            function loop() {
+                if (!engineRunning) return;
+                renderFrame();
+                timeoutId = setTimeout(loop, 1000 / 60);
+            }
+            loop();
+        }
+
+        // Hardware execution branch
+        try {
+            if (typeof window.requestAnimationFrame === 'function') {
+                engineRunning = true;
+                runEngine_rAF();
+                console.log("[Core] Frame Sync: requestAnimationFrame");
+            } else if (typeof window.setInterval === 'function') {
+                engineRunning = true;
+                runEngine_Interval();
+                console.log("[Core] Frame Sync: setInterval");
+            } else {
+                engineRunning = true;
+                runEngine_Timeout();
+                console.log("[Core] Frame Sync: setTimeout");
+            }
+        } catch (e) {
+            console.error("[Fatal] Render loop failed to attach.", e);
+        }
+
+        // Resize boundary protection
+        window.addEventListener('resize', () => {
+            cloudEngine.particles.forEach(p => { if(p.x > window.innerWidth) p.x = window.innerWidth - 100; });
+            ashEngine.particles.forEach(p => { if(p.x > window.innerWidth) p.x = window.innerWidth - 10; });
         });
 
-        // --- ГЕНЕРАТОР ПАДАЮЩИХ ЛЕПЕСТКОВ САКУРЫ ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let petals = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Petal {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height - canvas.height;
-                this.size = Math.random() * 8 + 4; // Размер лепестка
-                this.speedX = Math.random() * 1 - 0.5; // Смещение по горизонтали
-                this.speedY = Math.random() * 1.5 + 0.5; // Скорость падения
-                this.rotation = Math.random() * 360; // Угол
-                this.rotationSpeed = Math.random() * 2 - 1; // Скорость вращения
-                // Оттенки сакуры и иногда белый/голубоватый
-                const colors = ['#ffb7c5', '#ffc0cb', '#ffffff', '#e0c3fc'];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-                this.opacity = Math.random() * 0.6 + 0.2;
-            }
-            update() {
-                this.y += this.speedY;
-                this.x += this.speedX + Math.sin(this.y / 50) * 0.5; // Эффект ветра
-                this.rotation += this.rotationSpeed;
-
-                // Если лепесток улетел вниз - возвращаем наверх
-                if (this.y > canvas.height + 20 || this.x > canvas.width + 20 || this.x < -20) {
-                    this.reset();
-                    this.y = -20; // Спавн сверху
-                }
-            }
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate((this.rotation * Math.PI) / 180);
-                
-                ctx.beginPath();
-                // Рисуем форму лепестка с помощью кривых Безье
-                ctx.moveTo(0, 0);
-                ctx.bezierCurveTo(this.size/2, -this.size/2, this.size, -this.size/3, 0, this.size);
-                ctx.bezierCurveTo(-this.size, -this.size/3, -this.size/2, -this.size/2, 0, 0);
-                
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.opacity;
-                ctx.fill();
-                
-                ctx.restore();
-            }
-        }
-
-        // Создаем лепестки
-        for(let i=0; i<60; i++) {
-            petals.push(new Petal());
-            // Разбрасываем их сразу по всему экрану для старта
-            petals[i].y = Math.random() * canvas.height; 
-        }
-
-        function animatePetals() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            petals.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animatePetals);
-        }
-        animatePetals();
     </script>
 </body>
 </html>
