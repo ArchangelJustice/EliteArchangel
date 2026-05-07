@@ -11,21 +11,16 @@
            CORE ARCHITECTURE & VARIABLES
            ========================================= */
         :root {
-            /* Palette: Monochromatic Angelic Dark */
             --bg-absolute: #020202;
             --bg-dark: #0a0a0d;
-            
             --white-pure: #ffffff;
             --white-dim: #e0e0e0;
-            --white-smoke: rgba(255, 255, 255, 0.85); /* New heavy smoke variable */
+            --white-smoke: rgba(255, 255, 255, 0.85);
             --gray-text: #a0a0a0;
             --border-dim: rgba(255, 255, 255, 0.08);
             --border-highlight: rgba(255, 255, 255, 0.3);
-            
             --card-bg: rgba(12, 12, 15, 0.75);
             --card-bg-hover: rgba(18, 18, 22, 0.95);
-
-            /* Divine Glows & FX */
             --glow-halo: 0 0 35px rgba(255, 255, 255, 0.9), inset 0 0 20px rgba(255, 255, 255, 0.6);
             --glow-text: 0 0 20px rgba(255, 255, 255, 0.6);
             --glow-card: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 255, 255, 0.08);
@@ -38,7 +33,7 @@
             background-color: var(--bg-absolute);
             color: var(--white-dim);
             font-family: 'Noto Serif JP', serif;
-            overflow: hidden; /* Lock until click */
+            overflow: hidden;
             scroll-behavior: smooth;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -46,9 +41,6 @@
             position: relative;
         }
 
-        /* =========================================
-           GLOBAL ANIMATIONS LAYER
-           ========================================= */
         @keyframes floatLevitation {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-12px); }
@@ -56,8 +48,8 @@
         }
 
         @keyframes scanlineSweep {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 100vh; }
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
         }
 
         @keyframes tagPulse {
@@ -72,18 +64,24 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* =========================================
-           SCANLINE OVERLAY
-           ========================================= */
+        /* Оптимизированные сканирующие линии: теперь анимация на transform */
         .scanlines {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
-            background-size: 100% 4px;
             z-index: 900;
             pointer-events: none;
             opacity: 0.35;
+            overflow: hidden;
+        }
+        .scanlines::after {
+            content: '';
+            position: absolute;
+            top: -100vh; left: 0;
+            width: 100%; height: 200vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
+            background-size: 100% 4px;
             animation: scanlineSweep 10s linear infinite;
+            will-change: transform;
         }
 
         /* =========================================
@@ -93,21 +91,23 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            z-index: 0; 
+            z-index: 0;
             pointer-events: none;
             overflow: hidden;
             background: radial-gradient(circle at 50% 50%, var(--bg-dark) 0%, var(--bg-absolute) 100%);
+            /* mix-blend-mode вынесен на контейнер – одна операция вместо сотен */
+            mix-blend-mode: screen;
+            isolation: isolate;
         }
 
         .dom-cloud {
             position: absolute;
             border-radius: 50%;
-            /* Decreased blur slightly to make clouds look more solid and thick */
-            filter: blur(35px); 
+            filter: blur(35px);
             opacity: 0;
             pointer-events: none;
             will-change: transform, opacity;
-            mix-blend-mode: screen; /* Helps bright whites pop against dark bg */
+            /* убрали mix-blend-mode: screen с каждого облака */
         }
 
         #ash-engine-container {
@@ -143,9 +143,6 @@
             100% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
         }
 
-        /* =========================================
-           MAGIC CIRCLE & KANJI
-           ========================================= */
         .magic-circle {
             position: fixed;
             top: 50%; left: 50%;
@@ -157,6 +154,7 @@
             pointer-events: none;
             animation: spinCircle 100s linear infinite;
             box-shadow: inset 0 0 80px rgba(0,0,0,0.9), 0 0 40px rgba(255,255,255,0.04);
+            will-change: transform;
         }
         
         .magic-circle::before {
@@ -180,7 +178,7 @@
         .bg-kanji {
             position: fixed;
             top: 5%; right: 4%;
-            font-size: clamp(4rem, 8vw, 7rem); 
+            font-size: clamp(4rem, 8vw, 7rem);
             color: rgba(255, 255, 255, 0.06);
             writing-mode: vertical-rl;
             text-orientation: upright;
@@ -190,6 +188,7 @@
             pointer-events: none;
             text-shadow: 0 0 30px rgba(255,255,255,0.05);
             animation: kanjiFloat 8s ease-in-out infinite alternate, textGlitch 15s infinite;
+            will-change: transform;
         }
 
         @keyframes kanjiFloat {
@@ -275,7 +274,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            overflow-x: hidden; 
+            overflow-x: hidden;
         }
 
         section {
@@ -284,8 +283,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 100px 15px; 
+            padding: 100px 15px;
             position: relative;
+            /* Оптимизация рендеринга вне экрана */
+            content-visibility: auto;
+            contain-intrinsic-size: 100vh;
         }
 
         .reveal {
@@ -300,7 +302,7 @@
         }
 
         /* =========================================
-           GLASS PANELS & CARDS (WITH LEVITATION)
+           GLASS PANELS & CARDS
            ========================================= */
         .glass-panel {
             background: var(--card-bg);
@@ -308,7 +310,7 @@
             -webkit-backdrop-filter: blur(35px);
             border: 1px solid var(--border-dim);
             border-top: 1px solid var(--border-highlight);
-            padding: 60px 40px; 
+            padding: 60px 40px;
             border-radius: 20px;
             max-width: 850px;
             width: 100%;
@@ -317,7 +319,8 @@
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             transform-style: preserve-3d;
             margin: 0 auto;
-            animation: floatLevitation 8s ease-in-out infinite; /* Added global levitation */
+            animation: floatLevitation 8s ease-in-out infinite;
+            will-change: transform;
         }
 
         @media (max-width: 768px) {
@@ -328,7 +331,7 @@
             background: var(--card-bg-hover);
             border-color: rgba(255, 255, 255, 0.35);
             box-shadow: var(--glow-card-hover);
-            animation-play-state: paused; /* Stop levitation on hover for stability */
+            animation-play-state: paused;
         }
 
         /* =========================================
@@ -336,7 +339,7 @@
            ========================================= */
         .avatar-container {
             position: relative;
-            width: clamp(180px, 40vw, 240px); 
+            width: clamp(180px, 40vw, 240px);
             height: clamp(180px, 40vw, 240px);
             margin: 0 auto 50px;
             transform-style: preserve-3d;
@@ -383,11 +386,11 @@
         }
 
         /* =========================================
-           TYPOGRAPHY & TAGS (TEXT WRAP FIX)
+           TYPOGRAPHY & TAGS
            ========================================= */
-        .title-group { 
-            text-align: center; 
-            margin-bottom: 40px; 
+        .title-group {
+            text-align: center;
+            margin-bottom: 40px;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -407,17 +410,15 @@
 
         h1.name {
             font-family: 'Permanent Marker', cursive;
-            /* CLAMP FUNCTION with safe limits */
-            font-size: clamp(1.6rem, 7vw, 4.5rem); 
+            font-size: clamp(1.6rem, 7vw, 4.5rem);
             color: var(--white-pure);
             text-shadow: 0 5px 25px rgba(0,0,0,1), 0 0 30px rgba(255,255,255,0.4);
             line-height: 1.2;
             letter-spacing: 2px;
             position: relative;
-            display: block; 
+            display: block;
             width: 100%;
-            /* THE FIX: Allow natural break, but control WHERE it breaks using <wbr> in HTML */
-            word-break: normal; 
+            word-break: normal;
             overflow-wrap: normal;
             padding: 0 10px;
             transition: all 0.3s ease;
@@ -464,7 +465,6 @@
             animation: tagPulse 4s infinite alternate;
         }
 
-        /* Stagger tag animations */
         .tag:nth-child(1) { animation-delay: 0s; }
         .tag:nth-child(2) { animation-delay: 1s; }
         .tag:nth-child(3) { animation-delay: 2s; }
@@ -692,7 +692,6 @@
                 
                 <div class="title-group">
                     <div class="jap-subtitle">最高の天使</div>
-                    <!-- THE FIX: <wbr> tags injected to control text wrap logically -->
                     <h1 class="name">Elite<wbr>Archangel<wbr>Justice</h1>
                 </div>
                 
@@ -736,7 +735,7 @@
             </div>
         </section>
 
-        <!-- Section 3: Methodology (Fully Preserved & Animated) -->
+        <!-- Section 3: Methodology -->
         <section id="methods">
             <div class="glass-panel reveal parallax-element js-tilt" style="max-width: 950px;">
                 <h2 class="methodology-title">МЕТОДОЛОГИЯ</h2>
@@ -811,7 +810,7 @@
             overlay.style.opacity = '0';
             overlay.style.visibility = 'hidden';
             
-            audio.volume = 0.5; // Slightly louder
+            audio.volume = 0.5;
             audio.play().catch(e => console.warn("[System] Audio requires user interaction."));
 
             setTimeout(() => {
@@ -840,10 +839,9 @@
             
             reveals.forEach((reveal, index) => {
                 const revealTop = reveal.getBoundingClientRect().top;
-                const revealPoint = 100; // Trigger earlier
+                const revealPoint = 100;
                 
                 if(revealTop < windowHeight - revealPoint) {
-                    // Staggered reveal based on index
                     setTimeout(() => {
                         reveal.classList.add('active');
                     }, index * 150);
@@ -851,47 +849,35 @@
             });
         }
         window.addEventListener('scroll', revealOnScroll, { passive: true });
-        window.addEventListener('load', revealOnScroll); // Initial check
+        window.addEventListener('load', revealOnScroll);
 
         /* =========================================================================
-           SYSTEM ARCHITECTURE: PARALLAX & TILT
+           GLOBAL MOUSE STATE (для единого цикла)
            ========================================================================= */
-        if(window.matchMedia("(pointer: fine)").matches) {
-            document.addEventListener('mousemove', (e) => {
-                requestAnimationFrame(() => {
-                    const x = (window.innerWidth - e.pageX * 2) / 100;
-                    const y = (window.innerHeight - e.pageY * 2) / 100;
+        let mouseX = 0, mouseY = 0;
+        const tiltElements = document.querySelectorAll('.js-tilt');
+        const tiltStates = new Map(); // будем хранить rect и флаг hover
 
-                    const circle = document.getElementById('parallax-circle');
-                    const text = document.getElementById('parallax-text');
+        // Отслеживаем координаты мыши и ховер на tilt-элементах
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        }, { passive: true });
 
-                    if(circle) circle.style.transform = `translate(${x * -2}px, ${y * -2}px) rotate(${e.pageX/15}deg)`;
-                    if(text) text.style.transform = `translate(${x * -3}px, ${y * -3}px)`;
-                });
+        tiltElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                const rect = el.getBoundingClientRect();
+                tiltStates.set(el, { rect, hover: true });
             });
-
-            const tiltElements = document.querySelectorAll('.js-tilt');
-            tiltElements.forEach(el => {
-                el.addEventListener('mousemove', (e) => {
-                    const rect = el.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -5; // Intensified tilt
-                    const rotateY = ((x - centerX) / centerX) * 5;
-                    
-                    el.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
-                });
-                
-                el.addEventListener('mouseleave', () => {
-                    el.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
-                    el.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-                });
-                
-                el.addEventListener('mouseenter', () => { el.style.transition = 'none'; });
+            el.addEventListener('mouseleave', () => {
+                const state = tiltStates.get(el) || {};
+                state.hover = false;
+                tiltStates.set(el, state);
+                // Сброс трансформации с transition
+                el.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                el.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
             });
-        }
+        });
 
         /* =========================================================================
            OOP DOM PARTICLE ENGINE: THICK CLOUDS & ASH
@@ -925,26 +911,23 @@
                 this.element = document.createElement('div');
                 this.element.className = 'dom-cloud';
                 this.container.appendChild(this.element);
-                this.rotation = Math.random() * 360; // Added rotation state
-                this.rotSpeed = (Math.random() - 0.5) * 0.2; // Very slow rotation
+                this.rotation = Math.random() * 360;
+                this.rotSpeed = (Math.random() - 0.5) * 0.2;
             }
 
             reset(initial = false) {
-                const size = Math.random() * 600 + 400; // EVEN BIGGER clouds
+                const size = Math.random() * 600 + 400;
                 this.x = Math.random() * window.innerWidth;
                 this.y = initial ? Math.random() * window.innerHeight : window.innerHeight + size;
                 this.speedY = Math.random() * 1.5 + 0.5; 
                 this.speedX = (Math.random() - 0.5) * 0.8; 
-                
-                // MASSIVE OPACITY BOOST FOR VISIBILITY
                 this.opacity = Math.random() * 0.6 + 0.3; 
                 this.scale = Math.random() * 0.6 + 0.8;
                 
-                // Solid, bright colors for the core of the cloud
                 const shades = [
-                    'rgba(255, 255, 255, 0.45)', // Pure white core
-                    'rgba(220, 220, 230, 0.4)',  // Silver white
-                    'rgba(180, 180, 190, 0.35)', // Light gray
+                    'rgba(255, 255, 255, 0.45)',
+                    'rgba(220, 220, 230, 0.4)',
+                    'rgba(180, 180, 190, 0.35)',
                     'rgba(200, 200, 200, 0.4)'
                 ];
                 const color = shades[Math.floor(Math.random() * shades.length)];
@@ -960,7 +943,7 @@
                 this.y -= this.speedY;
                 this.x += this.speedX;
                 this.scale += 0.0008; 
-                this.rotation += this.rotSpeed; // Apply rotation
+                this.rotation += this.rotSpeed;
                 
                 if (this.y < -1000 || this.x < -1000 || this.x > window.innerWidth + 1000) {
                     this.reset();
@@ -969,7 +952,6 @@
             }
 
             updateDOM() {
-                // Now includes rotation for a more dynamic twisting smoke effect
                 this.element.style.transform = `translate3d(${this.x}px, ${this.y}px, 0) scale(${this.scale}) rotate(${this.rotation}deg)`;
                 this.element.style.opacity = this.opacity;
             }
@@ -990,7 +972,7 @@
                 this.y = initial ? Math.random() * window.innerHeight : window.innerHeight + 10;
                 this.speedY = Math.random() * 2.5 + 1.5; 
                 this.speedX = (Math.random() - 0.5) * 2.5; 
-                this.opacity = Math.random() * 0.9 + 0.3; // Brighter ash
+                this.opacity = Math.random() * 0.9 + 0.3;
                 
                 this.element.style.width = `${size}px`;
                 this.element.style.height = `${size}px`;
@@ -1000,7 +982,7 @@
 
             update() {
                 this.y -= this.speedY;
-                this.x += this.speedX + Math.sin(this.y / 40) * 0.8; // Wavering flight
+                this.x += this.speedX + Math.sin(this.y / 40) * 0.8;
                 
                 if (this.y < -50 || this.x < -50 || this.x > window.innerWidth + 50) {
                     this.reset();
@@ -1014,68 +996,67 @@
             }
         }
 
-        // Initialize Dual Engines with increased particle counts
+        // Initialize Dual Engines
         const isMobile = window.innerWidth < 768;
-        const cloudCount = isMobile ? 25 : 60; // Huge increase for density
-        const ashCount = isMobile ? 50 : 120; // More ash particles
+        const cloudCount = isMobile ? 25 : 60;
+        const ashCount = isMobile ? 50 : 120;
 
         const cloudEngine = new ParticleEngine('cloud-engine-container', cloudCount, SmokeParticle);
         const ashEngine = new ParticleEngine('ash-engine-container', ashCount, AshParticle);
 
         /* =========================================================================
-           3-TIER ANIMATION FALLBACK SYSTEM (Indestructible Render Loop)
+           ЕДИНЫЙ ЦИКЛ РЕНДЕРИНГА (оптимизация: всё в одном requestAnimationFrame)
            ========================================================================= */
-        let engineRunning = false;
-        let intervalId = null;
-        let timeoutId = null;
+        function mainLoop() {
+            if (document.hidden) {
+                requestAnimationFrame(mainLoop);
+                return;
+            }
 
-        function renderFrame() {
+            // 1. Обновление частиц
             cloudEngine.updateAll();
             ashEngine.updateAll();
-        }
 
-        function runEngine_rAF() {
-            if (!engineRunning) return;
-            renderFrame();
-            requestAnimationFrame(runEngine_rAF);
-        }
-
-        function runEngine_Interval() {
-            intervalId = setInterval(renderFrame, 1000 / 60);
-        }
-
-        function runEngine_Timeout() {
-            function loop() {
-                if (!engineRunning) return;
-                renderFrame();
-                timeoutId = setTimeout(loop, 1000 / 60);
+            // 2. Параллакс-эффекты
+            const circle = document.getElementById('parallax-circle');
+            const text = document.getElementById('parallax-text');
+            if (circle) {
+                const xParallax = (window.innerWidth - mouseX * 2) / 100;
+                const yParallax = (window.innerHeight - mouseY * 2) / 100;
+                circle.style.transform = `translate(${xParallax * -2}px, ${yParallax * -2}px) rotate(${mouseX/15}deg)`;
+                if (text) text.style.transform = `translate(${xParallax * -3}px, ${yParallax * -3}px)`;
             }
-            loop();
+
+            // 3. Tilt-эффекты
+            tiltStates.forEach((state, el) => {
+                if (state.hover && state.rect) {
+                    const rect = state.rect;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const relX = mouseX - rect.left;
+                    const relY = mouseY - rect.top;
+                    const rotateX = ((relY - centerY) / centerY) * -5;
+                    const rotateY = ((relX - centerX) / centerX) * 5;
+                    el.style.transition = 'none';
+                    el.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+                }
+            });
+
+            requestAnimationFrame(mainLoop);
         }
 
-        // Hardware execution branch
-        try {
-            if (typeof window.requestAnimationFrame === 'function') {
-                engineRunning = true;
-                runEngine_rAF();
-                console.log("[Core] Frame Sync: requestAnimationFrame");
-            } else if (typeof window.setInterval === 'function') {
-                engineRunning = true;
-                runEngine_Interval();
-                console.log("[Core] Frame Sync: setInterval");
-            } else {
-                engineRunning = true;
-                runEngine_Timeout();
-                console.log("[Core] Frame Sync: setTimeout");
-            }
-        } catch (e) {
-            console.error("[Fatal] Render loop failed to attach.", e);
-        }
+        requestAnimationFrame(mainLoop);
 
         // Resize boundary protection
         window.addEventListener('resize', () => {
             cloudEngine.particles.forEach(p => { if(p.x > window.innerWidth) p.x = window.innerWidth - 100; });
             ashEngine.particles.forEach(p => { if(p.x > window.innerWidth) p.x = window.innerWidth - 10; });
+            // Обновляем rect у tilt-элементов, которые сейчас в ховере
+            tiltStates.forEach((state, el) => {
+                if (state.hover) {
+                    state.rect = el.getBoundingClientRect();
+                }
+            });
         });
 
     </script>
